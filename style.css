@@ -1,3 +1,6 @@
+body {
+  background: red !important;
+}
 :root{
   --bg1:#070a1a;
   --bg2:#0b1230;
