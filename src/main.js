@@ -1,4 +1,4 @@
-import { loadQuestions, loadTip } from "./api.js";
+import { loadQuestions } from "./api.js";
 import { createEngine } from "./engine.js";
 import { loadHistory, saveAttempt, clearHistory } from "./storage.js";
 import { show, renderHistory, renderStats, renderTopbar, renderQuestion } from "./ui.js";
@@ -77,7 +77,6 @@ function finishQuiz() {
     <div class="stat"><b>${result.wrong}</b><span class="muted">Wrong</span></div>
     <div class="stat"><b>${result.percent}%</b><span class="muted">Score</span></div>
   `;
-
   renderStats(el("stats"), result.statsByCategory);
   show("screenResult");
 }
@@ -92,9 +91,7 @@ function wire() {
   el("prevBtn").addEventListener("click", () => { engine.prev(); startTimerIfNeeded(); });
   el("nextBtn").addEventListener("click", () => { engine.next(); startTimerIfNeeded(); });
   el("skipBtn").addEventListener("click", () => { engine.skip(); startTimerIfNeeded(); });
-  el("finishBtn").addEventListener("click", () => {
-    if (engine.canFinish()) finishQuiz();
-  });
+  el("finishBtn").addEventListener("click", () => engine.canFinish() && finishQuiz());
   el("quitBtn").addEventListener("click", backToSetup);
   el("restartBtn").addEventListener("click", startQuiz);
   el("backBtn").addEventListener("click", backToSetup);
@@ -102,12 +99,5 @@ function wire() {
     clearHistory();
     renderHistory(el("history"), []);
   });
-  const tipEl = el("tipText");
-  el("loadTipBtn").addEventListener("click", async () => {
-    tipEl.textContent = "Loading...";
-    const tip = await loadTip();
-    tipEl.textContent = tip;
-  });
 }
-
 wire();
