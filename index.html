@@ -13,13 +13,13 @@
         <div class="logo">Q</div>
         <div>
           <h1>Quizzy</h1>
-          <p class="sub">AI • JavaScript • Movies — локальний квіз</p>
+          <p class="sub">Topics only: AI / JavaScript / Movies • modules • localStorage • async demo</p>
         </div>
       </div>
       <div class="chips">
         <span class="chip">ES Modules</span>
-        <span class="chip">localStorage</span>
-        <span class="chip">Map / Set</span>
+        <span class="chip">Map/Set</span>
+        <span class="chip">Async demo</span>
       </div>
     </header>
     <section id="screenSetup" class="card screen active">
@@ -51,16 +51,23 @@
           </select>
         </label>
         <label class="field">
-          <span>Рандомізація відповідей</span>
+          <span>Рандомізація</span>
           <select id="shuffle">
-            <option value="yes" selected>Так</option>
-            <option value="no">Ні</option>
+            <option value="yes" selected>Yes</option>
+            <option value="no">No</option>
           </select>
         </label>
       </div>
       <div class="row">
         <button id="startBtn" class="btn primary">Start quiz</button>
         <button id="clearHistoryBtn" class="btn ghost">Clear history</button>
+      </div>
+      <div class="note">
+        <b>Async demo (fetch + JSON + try/catch):</b>
+        <span id="tipText">Натисни кнопку, щоб завантажити підказку.</span>
+        <div class="row">
+          <button id="loadTipBtn" class="btn ghost">Load tip</button>
+        </div>
       </div>
       <h3 class="subtitle">Останні результати</h3>
       <div id="history" class="history"></div>
@@ -79,8 +86,8 @@
         </div>
       </div>
       <div class="qCard">
-        <div id="category" class="category"></div>
-        <h2 id="question" class="question"></h2>
+        <div id="category" class="category">Category</div>
+        <h2 id="question" class="question">Question text</h2>
       </div>
       <div id="answers" class="answers"></div>
       <div class="row">
@@ -103,7 +110,7 @@
     </section>
     <footer class="foot">
       <span>Quizzy ©</span>
-      <span class="muted">Run locally or GitHub Pages</span>
+      <span class="muted">Run via Live Server or GitHub Pages</span>
     </footer>
   </div>
   <script type="module" src="./src/main.js"></script>
