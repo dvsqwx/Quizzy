@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Quizzy</title>
-  <link rel="stylesheet" href="./styles.css"/>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <div class="app">
@@ -13,14 +13,14 @@
         <div class="logo">Q</div>
         <div>
           <h1>Quizzy</h1>
-          <p class="sub">JavaScript quiz app  modules  async  localStorage</p>
+          <p class="sub">Topics only: AI / JavaScript / Movies • modules • localStorage • async demo</p>
         </div>
       </div>
 
       <div class="chips">
         <span class="chip">ES Modules</span>
-        <span class="chip">Async</span>
         <span class="chip">Map/Set</span>
+        <span class="chip">Async demo</span>
       </div>
     </header>
     <section id="screenSetup" class="card screen active">
@@ -28,20 +28,20 @@
 
       <div class="grid">
         <label class="field">
+          <span>Тема</span>
+          <select id="topic">
+            <option value="ai" selected>AI</option>
+            <option value="js">JavaScript</option>
+            <option value="movies">Фільми</option>
+          </select>
+        </label>
+
+        <label class="field">
           <span>Кількість питань</span>
           <select id="amount">
             <option value="5">5</option>
             <option value="10" selected>10</option>
             <option value="15">15</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Складність</span>
-          <select id="difficulty">
-            <option value="easy">easy</option>
-            <option value="medium" selected>medium</option>
-            <option value="hard">hard</option>
           </select>
         </label>
 
@@ -56,10 +56,10 @@
         </label>
 
         <label class="field">
-          <span>Режим</span>
-          <select id="mode">
-            <option value="online" selected>Online</option>
-            <option value="offline">local</option>
+          <span>Рандомізація</span>
+          <select id="shuffle">
+            <option value="yes" selected>Yes</option>
+            <option value="no">No</option>
           </select>
         </label>
       </div>
@@ -68,9 +68,12 @@
         <button id="startBtn" class="btn primary">Start quiz</button>
         <button id="clearHistoryBtn" class="btn ghost">Clear history</button>
       </div>
-
       <div class="note">
-        <b></b>
+        <b>Async demo (fetch + JSON + try/catch):</b>
+        <span id="tipText">Натисни кнопку, щоб завантажити підказку.</span>
+        <div class="row">
+          <button id="loadTipBtn" class="btn ghost">Load tip</button>
+        </div>
       </div>
 
       <h3 class="subtitle">Останні результати</h3>
@@ -123,7 +126,7 @@
 
     <footer class="foot">
       <span>Quizzy ©</span>
-      <span class="muted">Run local or GitHub Pages</span>
+      <span class="muted">Run via Live Server or GitHub Pages</span>
     </footer>
   </div>
 
