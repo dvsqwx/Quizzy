@@ -100,4 +100,4 @@ function wire() {
     renderHistory(el("history"), []);
   });
 }
-wire();
+window.addEventListener("DOMContentLoaded", wire);
