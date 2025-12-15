@@ -61,6 +61,7 @@ h1{ margin:0; font-size:30px; letter-spacing:.2px; }
 
 .title{ margin:0 0 12px; font-size:20px; }
 .subtitle{ margin:16px 0 8px; font-size:14px; color: var(--muted); }
+
 #screenSetup{
   display:grid;
   grid-template-columns: 1.4fr .9fr;
@@ -144,6 +145,7 @@ input:focus, select:focus{
   gap:10px; flex-wrap:wrap;
 }
 .kv{ color: var(--muted); font-size:13px; }
+
 #screenQuiz{
   display:grid;
   grid-template-columns: 1.05fr .95fr;
