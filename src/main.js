@@ -1,6 +1,5 @@
-import { loadQuestions, loadTip } from "./api.js";
+import { loadQuestions, saveResult, loadResults } from "./api.js";
 import { createEngine } from "./engine.js";
-import { loadHistory, saveAttempt, clearHistory } from "./storage.js";
 import { show, renderHistory, renderStats, renderTopbar, renderQuestion } from "./ui.js";
 const el = (id) => document.getElementById(id);
 let engine = null;
@@ -56,22 +55,30 @@ function render() {
     }
   });
 }
-function startQuiz() {
+async function refreshHistoryFromServer() {
+  const list = await loadResults();
+  renderHistory(el("history"), list);
+}
+async function startQuiz() {
   const topic = el("topic").value;
   const amount = Number(el("amount").value);
   const timeLimitSec = Number(el("timeLimit").value);
   const shuffleAnswers = el("shuffle").value === "yes";
-  const questions = loadQuestions({ topic, amount, shuffleAnswers });
+  const questions = await loadQuestions({ topic, amount, shuffleAnswers });
+  if (!questions.length) {
+    alert("Немає питань для цієї теми. Додай питання на сервер або в localQuestions.js");
+    return;
+  }
   engine = createEngine(questions, { timeLimitSec });
   show("screenQuiz");
   el("hint").textContent = "";
   startTimerIfNeeded();
 }
-function finishQuiz() {
+async function finishQuiz() {
   stopTimer();
   const result = engine.evaluate();
-  const attempt = { ...result, date: new Date().toISOString() };
-  saveAttempt(attempt);
+  const topic = el("topic").value;
+  await saveResult({ topic, total: result.total, correct: result.correct, percent: result.percent });
   el("summary").innerHTML = `
     <div class="stat"><b>${result.correct}/${result.total}</b><span class="muted">Correct</span></div>
     <div class="stat"><b>${result.wrong}</b><span class="muted">Wrong</span></div>
@@ -80,32 +87,28 @@ function finishQuiz() {
   renderStats(el("stats"), result.statsByCategory);
   show("screenResult");
 }
-function backToSetup() {
+async function backToSetup() {
   stopTimer();
-  renderHistory(el("history"), loadHistory());
+  await refreshHistoryFromServer();
   show("screenSetup");
 }
 function wire() {
-  renderHistory(el("history"), loadHistory());
   el("startBtn").addEventListener("click", startQuiz);
-  el("prevBtn").addEventListener("click", () => { engine.prev(); startTimerIfNeeded(); });
-  el("nextBtn").addEventListener("click", () => { engine.next(); startTimerIfNeeded(); });
-  el("skipBtn").addEventListener("click", () => { engine.skip(); startTimerIfNeeded(); });
-  el("finishBtn").addEventListener("click", () => {
-    if (engine.canFinish()) finishQuiz();
+  el("prevBtn").addEventListener("click", () => { engine?.prev(); startTimerIfNeeded(); });
+  el("nextBtn").addEventListener("click", () => { engine?.next(); startTimerIfNeeded(); });
+  el("skipBtn").addEventListener("click", () => { engine?.skip(); startTimerIfNeeded(); });
+  el("finishBtn").addEventListener("click", async () => {
+    if (engine && engine.canFinish()) await finishQuiz();
   });
   el("quitBtn").addEventListener("click", backToSetup);
   el("restartBtn").addEventListener("click", startQuiz);
   el("backBtn").addEventListener("click", backToSetup);
   el("clearHistoryBtn").addEventListener("click", () => {
-    clearHistory();
     renderHistory(el("history"), []);
-  });
-  const tipEl = el("tipText");
-  el("loadTipBtn").addEventListener("click", async () => {
-    tipEl.textContent = "Loading...";
-    const tip = await loadTip();
-    tipEl.textContent = tip;
+    alert("Щоб повністю очистити серверну історію — очисти server/db.json або додай endpoint /api/results/clear.");
   });
 }
-wire();
+window.addEventListener("DOMContentLoaded", async () => {
+  wire();
+  await refreshHistoryFromServer();
+});
