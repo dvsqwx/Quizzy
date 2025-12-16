@@ -109,6 +109,48 @@ async function backToSetup() {
   await refreshHistoryFromServer();
   show("screenSetup");
 }
+function bindHotkeys() {
+  document.addEventListener("keydown", (e) => {
+    const quizActive = document.getElementById("screenQuiz")?.classList.contains("active");
+    if (!quizActive || !engine) return;
+    const tag = document.activeElement?.tagName;
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    switch (e.key) {
+      case "ArrowRight":
+      case "Enter":
+        engine.next();
+        startTimerIfNeeded();
+        break;
+      case "ArrowLeft":
+        engine.prev();
+        startTimerIfNeeded();
+        break;
+      case "Escape":
+        backToSetup();
+        break;
+      case "1":
+      case "2":
+      case "3":
+      case "4": {
+        const idx = Number(e.key) - 1;
+        const q = engine.current();
+        const ans = q?.answers?.[idx];
+        if (!ans) return;
+        engine.select(ans);
+        reveal = { correct: q.correct, chosen: ans };
+        el("hint").textContent = ans === q.correct ? "Правильно!" : "Неправильно.";
+        stopTimer();
+        setTimeout(() => {
+          reveal = null;
+          el("hint").textContent = "";
+          engine.next();
+          startTimerIfNeeded();
+        }, 650);
+        break;
+      }
+    }
+  });
+}
 function wire() {
   initTheme();
   document.getElementById("themeLightBtn")?.addEventListener("click", () => applyTheme("light"));
@@ -140,6 +182,7 @@ function wire() {
   el("quitBtn")?.addEventListener("click", backToSetup);
   el("restartBtn")?.addEventListener("click", startQuiz);
   el("backBtn")?.addEventListener("click", backToSetup);
+  bindHotkeys();
 }
 window.addEventListener("DOMContentLoaded", async () => {
   wire();
