@@ -1,10 +1,13 @@
 quizzy/
   index.html
   styles.css
+  package.json
   src/
     main.js
     api.js
     engine.js
-    storage.js
     ui.js
     localQuestions.js
+  server/
+    server.js
+    db.json
