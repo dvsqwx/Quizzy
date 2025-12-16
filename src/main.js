@@ -18,6 +18,8 @@ let engine = null;
 let timerId = null;
 let timeLeft = 0;
 let reveal = null;
+let gameMode = "normal";
+let streak = 0;
 function stopTimer() {
   if (timerId) clearInterval(timerId);
   timerId = null;
@@ -37,6 +39,9 @@ function startTimerIfNeeded() {
     timeLeft--;
     const { index, total } = engine.progress();
     renderTopbar({ index, total, timeLeft, hasTimer: true });
+    const timerEl = el("timer");
+    if (timerEl && timeLeft <= 5) timerEl.classList.add("danger");
+    if (timerEl && timeLeft > 5) timerEl.classList.remove("danger");
     if (timeLeft <= 0) {
       engine.skip();
       startTimerIfNeeded();
@@ -55,15 +60,39 @@ function render() {
     revealState: reveal,
     onChoose: (ans) => {
       engine.select(ans);
+      const correct = ans === q.correct;
+      switch (gameMode) {
+        case "exam":
+          if (!correct && engine.timeLimitSec > 0) {
+            timeLeft = Math.max(0, timeLeft - 5);
+          }
+          break;
+        case "streak":
+          if (correct) {
+            streak += 1;
+            if (engine.timeLimitSec > 0 && streak % 3 === 0) {
+              timeLeft += 5;
+            }
+          } else {
+            streak = 0;
+          }
+          break;
+        default:
+          break;
+      }
       reveal = { correct: q.correct, chosen: ans };
-      el("hint").textContent = ans === q.correct ? "Правильно!" : "Неправильно.";
+      el("hint").textContent = correct
+        ? "Правильно!"
+        : (gameMode === "exam" && engine.timeLimitSec > 0)
+          ? "Помилка! −5 секунд"
+          : "Неправильно";
       stopTimer();
       setTimeout(() => {
         reveal = null;
         el("hint").textContent = "";
         engine.next();
         startTimerIfNeeded();
-      }, 650);
+      }, 700);
     }
   });
 }
@@ -71,14 +100,72 @@ async function refreshHistoryFromServer() {
   const list = await loadResults();
   renderHistory(el("history"), list);
 }
+function calculateStats(results) {
+  const totalGames = results.length;
+  if (!totalGames) return null;
+  let sum = 0;
+  const byTopic = {};
+  results.forEach((r) => {
+    const percent = Number(r.percent) || 0;
+    sum += percent;
+    if (!byTopic[r.topic]) {
+      byTopic[r.topic] = { games: 0, avgSum: 0, best: percent, worst: percent };
+    }
+    byTopic[r.topic].games += 1;
+    byTopic[r.topic].avgSum += percent;
+    byTopic[r.topic].best = Math.max(byTopic[r.topic].best, percent);
+    byTopic[r.topic].worst = Math.min(byTopic[r.topic].worst, percent);
+  });
+  const average = Math.round(sum / totalGames);
+  const byTopicRows = Object.entries(byTopic).map(([topic, t]) => ({
+    topic,
+    games: t.games,
+    avg: Math.round(t.avgSum / t.games),
+    best: t.best,
+    worst: t.worst
+  }));
+  byTopicRows.sort((a, b) => (b.games - a.games) || (b.avg - a.avg));
+  return { totalGames, average, byTopicRows };
+}
+async function openStats() {
+  const results = await loadResults();
+  const stats = calculateStats(results);
+  if (!stats) {
+    el("statsSummary").innerHTML = `<div class="muted">Немає даних для статистики.</div>`;
+    el("statsByTopic").innerHTML = "";
+    el("statsLast").innerHTML = "";
+    show("screenStats");
+    return;
+  }
+  el("statsSummary").innerHTML = `
+    <div class="stat"><b>${stats.totalGames}</b><span class="muted">Ігор</span></div>
+    <div class="stat"><b>${stats.average}%</b><span class="muted">Середній результат</span></div>
+  `;
+  el("statsByTopic").innerHTML = stats.byTopicRows.map(t => `
+    <div class="histItem">
+      <b>${t.topic}</b>
+      <span class="muted">${t.avg}% avg • ${t.games} games • best ${t.best}% • worst ${t.worst}%</span>
+    </div>
+  `).join("");
+  const last10 = results.slice(-10).reverse();
+  el("statsLast").innerHTML = last10.map(r => `
+    <div class="histItem">
+      <b>${r.topic}</b>
+      <span class="muted">${r.correct}/${r.total} • ${r.percent}%</span>
+    </div>
+  `).join("");
+  show("screenStats");
+}
 async function startQuiz() {
   const topic = el("topic").value;
   const amount = Number(el("amount").value);
   const timeLimitSec = Number(el("timeLimit").value);
   const shuffleAnswers = el("shuffle").value === "yes";
+  gameMode = el("mode")?.value || "normal";
+  streak = 0;
   const questions = await loadQuestions({ topic, amount, shuffleAnswers });
   if (!questions.length) {
-    alert("Немає питань для цієї теми. Додай питання на сервер або в localQuestions.js");
+    alert("Немає питань для цієї теми. Додай питання на сервер або в локальну базу.");
     return;
   }
   engine = createEngine(questions, { timeLimitSec });
@@ -92,6 +179,7 @@ async function finishQuiz() {
   const topic = el("topic").value;
   await saveResult({
     topic,
+    mode: gameMode,
     total: result.total,
     correct: result.correct,
     percent: result.percent
@@ -100,6 +188,7 @@ async function finishQuiz() {
     <div class="stat"><b>${result.correct}/${result.total}</b><span class="muted">Correct</span></div>
     <div class="stat"><b>${result.wrong}</b><span class="muted">Wrong</span></div>
     <div class="stat"><b>${result.percent}%</b><span class="muted">Score</span></div>
+    <div class="stat"><b>${gameMode}</b><span class="muted">Mode</span></div>
   `;
   renderStats(el("stats"), result.statsByCategory);
   show("screenResult");
@@ -136,29 +225,49 @@ function bindHotkeys() {
         const q = engine.current();
         const ans = q?.answers?.[idx];
         if (!ans) return;
+        const correct = ans === q.correct;
         engine.select(ans);
+        switch (gameMode) {
+          case "exam":
+            if (!correct && engine.timeLimitSec > 0) timeLeft = Math.max(0, timeLeft - 5);
+            break;
+          case "streak":
+            if (correct) {
+              streak += 1;
+              if (engine.timeLimitSec > 0 && streak % 3 === 0) timeLeft += 5;
+            } else streak = 0;
+            break;
+          default:
+            break;
+        }
         reveal = { correct: q.correct, chosen: ans };
-        el("hint").textContent = ans === q.correct ? "Правильно!" : "Неправильно.";
+        el("hint").textContent = correct
+          ? "Правильно!"
+          : (gameMode === "exam" && engine.timeLimitSec > 0)
+            ? "Помилка! −5 секунд"
+            : "Неправильно";
         stopTimer();
         setTimeout(() => {
           reveal = null;
           el("hint").textContent = "";
           engine.next();
           startTimerIfNeeded();
-        }, 650);
+        }, 700);
         break;
       }
     }
   });
 }
 function wire() {
+  // Theme
   initTheme();
   document.getElementById("themeLightBtn")?.addEventListener("click", () => applyTheme("light"));
   document.getElementById("themeDarkBtn")?.addEventListener("click", () => applyTheme("dark"));
   el("startBtn")?.addEventListener("click", startQuiz);
+  el("openStatsBtn")?.addEventListener("click", openStats);
   el("clearHistoryBtn")?.addEventListener("click", () => {
     renderHistory(el("history"), []);
-    alert("Щоб очистити серверну історію повністю — очисти server/db.json або додай endpoint для очищення.");
+    alert("Це очищає лише UI. Для повного очищення серверної історії — потрібно endpoint або очистити db.");
   });
   el("prevBtn")?.addEventListener("click", () => {
     if (!engine) return;
@@ -182,6 +291,8 @@ function wire() {
   el("quitBtn")?.addEventListener("click", backToSetup);
   el("restartBtn")?.addEventListener("click", startQuiz);
   el("backBtn")?.addEventListener("click", backToSetup);
+  el("goStatsBtn")?.addEventListener("click", openStats);
+  el("backFromStatsBtn")?.addEventListener("click", backToSetup);
   bindHotkeys();
 }
 window.addEventListener("DOMContentLoaded", async () => {
