@@ -7,22 +7,42 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="app">
-    <header class="top">
-      <div class="brand">
-        <h1>Quizzy</h1>
-        <p class="sub">AI • JavaScript • Movies</p>
+  <header class="hero">
+    <div class="heroInner">
+      <div class="heroTop">
+        <div class="heroBrand">
+          <div class="mark">QZ</div>
+          <div class="heroText">
+            <div class="kicker">AI • JavaScript • Movies</div>
+            <h1 class="wordmark">QUIZZY</h1>
+            <div class="tagline">Quiz app with modes + statistics</div>
+          </div>
+        </div>
+        <div class="themeSwitch" role="group" aria-label="Theme switch">
+          <button id="themeLightBtn" class="tbtn" type="button">Light</button>
+          <button id="themeDarkBtn" class="tbtn" type="button">Dark</button>
+        </div>
       </div>
-      <div class="themeSwitch" role="group" aria-label="Theme switch">
-        <button id="themeLightBtn" class="tbtn" type="button">Light</button>
-        <button id="themeDarkBtn" class="tbtn" type="button">Dark</button>
+      <div class="heroActions">
+        <button id="startBtn" class="cta primary" type="button">Start quiz</button>
+        <button id="openStatsBtn" class="cta ghost" type="button">Statistics</button>
       </div>
-    </header>
-    <section id="screenSetup" class="card screen active">
-      <h2 class="title">Налаштування</h2>
-      <div class="workGrid">
-        <div class="leftPane">
-          <div class="grid">
+      <div class="heroMeta">
+        <div class="chip">Modes: Normal / Exam / Streak</div>
+        <div class="chip">Async: fetch + JSON + try/catch</div>
+        <div class="chip">Local UI + Server results</div>
+      </div>
+    </div>
+  </header>
+  <main class="app">
+    <section id="screenSetup" class="panel screen active">
+      <div class="panelHead">
+        <h2 class="panelTitle">Налаштування</h2>
+        <div class="muted small">Порада: обери тему, режим, таймер — і стартуй</div>
+      </div>
+      <div class="layout">
+        <div class="left">
+          <div class="formGrid">
             <label class="field">
               <span>Тема</span>
               <select id="topic">
@@ -60,74 +80,74 @@
               <select id="mode">
                 <option value="normal" selected>Normal</option>
                 <option value="exam">Exam (помилка = −5 сек)</option>
-                <option value="streak">Streak (бонус за серію)</option>
+                <option value="streak">Streak (кожні 3 правильні = +5 сек)</option>
               </select>
             </label>
             <div class="field" aria-hidden="true"></div>
           </div>
           <div class="row">
-            <button id="startBtn" class="btn primary" type="button">Start quiz</button>
-            <button id="openStatsBtn" class="btn ghost" type="button">Statistics</button>
             <button id="clearHistoryBtn" class="btn ghost" type="button">Clear history</button>
           </div>
-          <div class="muted smallNote">
-          </div>
         </div>
-        <aside class="rightPane">
-          <div class="paneTitle">Останні результати</div>
+        <aside class="right">
+          <div class="sideTitle">Останні результати</div>
           <div id="history" class="history"></div>
         </aside>
       </div>
     </section>
-    <section id="screenQuiz" class="card screen">
+    <section id="screenQuiz" class="panel screen">
       <div class="quizTop">
         <div class="progressWrap">
-          <div id="progressText" class="progressText muted">1/10</div>
-          <div class="progressBar">
-            <div id="progressFill" class="progressFill"></div>
-          </div>
+          <div id="progressText" class="muted small">1/10</div>
+          <div class="bar"><div id="progressFill" class="fill"></div></div>
         </div>
         <div class="rightInfo">
           <div id="timer" class="timer hidden">20</div>
-          <button id="quitBtn" class="btn ghost small" type="button">Quit</button>
+          <button id="quitBtn" class="btn ghost" type="button">Quit</button>
         </div>
       </div>
-      <div class="quizGrid">
-        <div class="qCard">
-          <div id="category" class="category"></div>
-          <h2 id="question" class="question"></h2>
+      <div class="quizLayout">
+        <div class="qBlock">
+          <div id="category" class="muted small"></div>
+          <h2 id="question" class="qTitle"></h2>
+          <div id="hint" class="muted small hint"></div>
+          <div class="muted tiny">Keys: ← → Enter • 1–4 • Esc</div>
         </div>
-        <div class="answersWrap">
-          <div class="paneTitle">Answers</div>
+        <div class="aBlock">
+          <div class="sideTitle">Answers</div>
           <div id="answers" class="answers"></div>
+          <div class="nav">
+            <button id="prevBtn" class="btn ghost" type="button">Prev</button>
+            <button id="skipBtn" class="btn ghost" type="button">Skip</button>
+            <button id="nextBtn" class="btn ghost" type="button">Next</button>
+            <button id="finishBtn" class="btn solid" type="button">Finish</button>
+          </div>
         </div>
       </div>
-      <div class="row navRow">
-        <button id="prevBtn" class="btn ghost" type="button">Prev</button>
-        <button id="skipBtn" class="btn ghost" type="button">Skip</button>
-        <button id="nextBtn" class="btn ghost" type="button">Next</button>
-        <button id="finishBtn" class="btn primary" type="button">Finish</button>
-      </div>
-      <div id="hint" class="hint"></div>
-      <div class="hotkeys muted">Keys: ← → Enter • 1–4 • Esc</div>
     </section>
-    <section id="screenResult" class="card screen">
-      <h2 class="title">Результат</h2>
+    <section id="screenResult" class="panel screen">
+      <div class="panelHead">
+        <h2 class="panelTitle">Результат</h2>
+        <div class="muted small">Можеш одразу перейти до статистики</div>
+      </div>
       <div id="summary" class="summary"></div>
       <div class="row">
-        <button id="restartBtn" class="btn primary" type="button">Play again</button>
+        <button id="restartBtn" class="btn solid" type="button">Play again</button>
         <button id="backBtn" class="btn ghost" type="button">Back</button>
         <button id="goStatsBtn" class="btn ghost" type="button">Statistics</button>
       </div>
-      <div class="paneTitle">Статистика (за категоріями цього квізу)</div>
+      <div class="sideTitle">Статистика (за категоріями цього квізу)</div>
       <div id="stats" class="history"></div>
     </section>
-    <section id="screenStats" class="card screen">
-      <h2 class="title">Статистика</h2>
+    <section id="screenStats" class="panel screen">
+      <div class="panelHead">
+        <h2 class="panelTitle">Статистика</h2>
+        <div class="muted small">Агрегація результатів з сервера</div>
+      </div>
       <div id="statsSummary" class="summary"></div>
-      <div class="paneTitle">Результати по темах</div>
+      <div class="sideTitle">Результати по темах</div>
       <div id="statsByTopic" class="history"></div>
-      <div class="paneTitle">Останні 10 ігор</div>
+      <div class="sideTitle">Останні 10 ігор</div>
       <div id="statsLast" class="history"></div>
       <div class="row">
         <button id="backFromStatsBtn" class="btn ghost" type="button">Back</button>
@@ -137,7 +157,7 @@
       <span>Quizzy ©</span>
       <span class="muted">Run locally or via GitHub Pages</span>
     </footer>
-  </div>
+  </main>
   <div class="polaroidDock" aria-hidden="true">
     <div class="polaroidBar">
       <span></span><span></span><span></span><span></span><span></span>
