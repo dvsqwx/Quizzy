@@ -10,10 +10,8 @@
   <div class="app">
     <header class="top">
       <div class="brand">
-        <div>
-          <h1>Quizzy</h1>
-          <p class="sub">AI • JavaScript • Movies</p>
-        </div>
+        <h1>Quizzy</h1>
+        <p class="sub">AI • JavaScript • Movies</p>
       </div>
       <div class="meta">
         <div class="themeSwitch" role="group" aria-label="Theme switch">
@@ -23,52 +21,61 @@
       </div>
     </header>
     <section id="screenSetup" class="card screen active">
-      <h2 class="title">Налаштування</h2>
-      <div class="grid">
-        <label class="field">
-          <span>Тема</span>
-          <select id="topic">
-            <option value="ai" selected>AI</option>
-            <option value="js">JavaScript</option>
-            <option value="movies">Фільми</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Кількість питань</span>
-          <select id="amount">
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="15">15</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Таймер (сек/питання)</span>
-          <select id="timeLimit">
-            <option value="0">Без таймера</option>
-            <option value="15">15</option>
-            <option value="20" selected>20</option>
-            <option value="30">30</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Рандомізація відповідей</span>
-          <select id="shuffle">
-            <option value="yes" selected>Так</option>
-            <option value="no">Ні</option>
-          </select>
-        </label>
+      <div class="screenHead">
+        <h2 class="title">Налаштування</h2>
+        <div class="rightHint muted">Tip: Start → пройти квіз, результати збережуться</div>
       </div>
-      <div class="row">
-        <button id="startBtn" class="btn primary" type="button">Start quiz</button>
-        <button id="clearHistoryBtn" class="btn ghost" type="button">Clear history</button>
+      <div class="workGrid">
+        <div class="leftPane">
+          <div class="grid">
+            <label class="field">
+              <span>Тема</span>
+              <select id="topic">
+                <option value="ai" selected>AI</option>
+                <option value="js">JavaScript</option>
+                <option value="movies">Фільми</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Кількість питань</span>
+              <select id="amount">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Таймер (сек/питання)</span>
+              <select id="timeLimit">
+                <option value="0">Без таймера</option>
+                <option value="15">15</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Рандомізація відповідей</span>
+              <select id="shuffle">
+                <option value="yes" selected>Так</option>
+                <option value="no">Ні</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <button id="startBtn" class="btn primary" type="button">Start quiz</button>
+            <button id="clearHistoryBtn" class="btn ghost" type="button">Clear history</button>
+          </div>
+        </div>
+        <aside class="rightPane">
+          <div class="paneTitle">Останні результати</div>
+          <div id="history" class="history"></div>
+        </aside>
       </div>
-      <h3 class="subtitle">Останні результати</h3>
-      <div id="history" class="history"></div>
     </section>
     <section id="screenQuiz" class="card screen">
       <div class="quizTop">
         <div class="progressWrap">
-          <div id="progressText" class="progressText">1/10</div>
+          <div class="progressText muted"><span id="progressText">1/10</span></div>
           <div class="progressBar">
             <div id="progressFill" class="progressFill"></div>
           </div>
@@ -78,32 +85,41 @@
           <button id="quitBtn" class="btn ghost small" type="button">Quit</button>
         </div>
       </div>
-      <div class="qCard">
-        <div id="category" class="category"></div>
-        <h2 id="question" class="question"></h2>
+      <div class="quizGrid">
+        <div class="qCard">
+          <div id="category" class="category"></div>
+          <h2 id="question" class="question"></h2>
+        </div>
+        <div class="answersWrap">
+          <div class="paneTitle">Answers</div>
+          <div id="answers" class="answers"></div>
+        </div>
       </div>
-      <div id="answers" class="answers"></div>
-      <div class="row">
+      <div class="row navRow">
         <button id="prevBtn" class="btn ghost" type="button">Prev</button>
         <button id="skipBtn" class="btn ghost" type="button">Skip</button>
         <button id="nextBtn" class="btn ghost" type="button">Next</button>
         <button id="finishBtn" class="btn primary" type="button">Finish</button>
       </div>
       <div id="hint" class="hint"></div>
+      <div class="hotkeys muted">Keys: ← → Enter • 1–4 answers • Esc exit</div>
     </section>
     <section id="screenResult" class="card screen">
-      <h2 class="title">Результат</h2>
+      <div class="screenHead">
+        <h2 class="title">Результат</h2>
+        <div class="rightHint muted">Порада: Play again — нова спроба</div>
+      </div>
       <div id="summary" class="summary"></div>
       <div class="row">
         <button id="restartBtn" class="btn primary" type="button">Play again</button>
         <button id="backBtn" class="btn ghost" type="button">Back to setup</button>
       </div>
-      <h3 class="subtitle">Статистика за категоріями</h3>
+      <div class="paneTitle">Статистика за категоріями</div>
       <div id="stats" class="history"></div>
     </section>
     <footer class="foot">
       <span>Quizzy ©</span>
-      <span class="muted">Run locally or GitHub Pages</span>
+      <span class="muted">Run: npm i → npm run dev → http://localhost:3000</span>
     </footer>
   </div>
   <script type="module" src="./src/main.js"></script>
