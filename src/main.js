@@ -7,10 +7,8 @@ function applyTheme(theme) {
   localStorage.setItem("quizzy_theme", theme);
   const bL = document.getElementById("themeLightBtn");
   const bD = document.getElementById("themeDarkBtn");
-  if (bL && bD) {
-    bL.classList.toggle("active", theme === "light");
-    bD.classList.toggle("active", theme === "dark");
-  }
+  if (bL) bL.classList.toggle("active", theme === "light");
+  if (bD) bD.classList.toggle("active", theme === "dark");
 }
 function initTheme() {
   const saved = localStorage.getItem("quizzy_theme");
@@ -23,6 +21,27 @@ let reveal = null;
 function stopTimer() {
   if (timerId) clearInterval(timerId);
   timerId = null;
+}
+function startTimerIfNeeded() {
+  stopTimer();
+  reveal = null;
+  const limit = engine.timeLimitSec;
+  const hasTimer = limit > 0;
+  if (!hasTimer) {
+    render();
+    return;
+  }
+  timeLeft = limit;
+  render();
+  timerId = setInterval(() => {
+    timeLeft--;
+    const { index, total } = engine.progress();
+    renderTopbar({ index, total, timeLeft, hasTimer: true });
+    if (timeLeft <= 0) {
+      engine.skip();
+      startTimerIfNeeded();
+    }
+  }, 1000);
 }
 function render() {
   const { index, total } = engine.progress();
@@ -47,27 +66,6 @@ function render() {
       }, 650);
     }
   });
-}
-function startTimerIfNeeded() {
-  stopTimer();
-  reveal = null;
-  const limit = engine.timeLimitSec;
-  const hasTimer = limit > 0;
-  if (!hasTimer) {
-    render();
-    return;
-  }
-  timeLeft = limit;
-  render();
-  timerId = setInterval(() => {
-    timeLeft--;
-    const { index, total } = engine.progress();
-    renderTopbar({ index, total, timeLeft, hasTimer: true });
-    if (timeLeft <= 0) {
-      engine.skip();
-      startTimerIfNeeded();
-    }
-  }, 1000);
 }
 async function refreshHistoryFromServer() {
   const list = await loadResults();
