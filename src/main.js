@@ -1,301 +1,396 @@
-import { loadQuestions, saveResult, loadResults } from "./api.js";
-import { createEngine } from "./engine.js";
-import { show, renderHistory, renderStats, renderTopbar, renderQuestion } from "./ui.js";
-const el = (id) => document.getElementById(id);
-function applyTheme(theme) {
+import { loadQuestions, loadResults, saveResult } from "./api.js";
+const $ = (sel) => document.querySelector(sel);
+const els = {
+  themeLightBtn: $("#themeLightBtn"),
+  themeDarkBtn: $("#themeDarkBtn"),
+  startBtn: $("#startBtn"),
+  openStatsBtn: $("#openStatsBtn"),
+  screenSetup: $("#screenSetup"),
+  screenQuiz: $("#screenQuiz"),
+  screenResult: $("#screenResult"),
+  screenStats: $("#screenStats"),
+  topic: $("#topic"),
+  amount: $("#amount"),
+  timeLimit: $("#timeLimit"),
+  shuffle: $("#shuffle"),
+  mode: $("#mode"),
+  clearHistoryBtn: $("#clearHistoryBtn"),
+  history: $("#history"),
+  progressText: $("#progressText"),
+  progressFill: $("#progressFill"),
+  timer: $("#timer"),
+  quitBtn: $("#quitBtn"),
+  category: $("#category"),
+  question: $("#question"),
+  hint: $("#hint"),
+  answers: $("#answers"),
+  prevBtn: $("#prevBtn"),
+  skipBtn: $("#skipBtn"),
+  nextBtn: $("#nextBtn"),
+  finishBtn: $("#finishBtn"),
+  summary: $("#summary"),
+  stats: $("#stats"),
+  restartBtn: $("#restartBtn"),
+  backBtn: $("#backBtn"),
+  goStatsBtn: $("#goStatsBtn"),
+  statsSummary: $("#statsSummary"),
+  statsByTopic: $("#statsByTopic"),
+  statsLast: $("#statsLast"),
+  backFromStatsBtn: $("#backFromStatsBtn"),
+};
+const state = {
+  settings: {
+    topic: "ai",
+    amount: 10,
+    timeLimit: 20,
+    shuffle: true,
+    mode: "normal",
+  },
+  questions: [],
+  index: 0,
+  chosen: new Map(),
+  streak: 0,
+  timerLeft: 0,
+  timerId: null,
+};
+function showScreen(name) {
+  [els.screenSetup, els.screenQuiz, els.screenResult, els.screenStats].forEach(s => {
+    if (s) s.classList.remove("active");
+  });
+  const map = {
+    setup: els.screenSetup,
+    quiz: els.screenQuiz,
+    result: els.screenResult,
+    stats: els.screenStats,
+  };
+  map[name]?.classList.add("active");
+}
+function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem("quizzy_theme", theme);
-  const bL = document.getElementById("themeLightBtn");
-  const bD = document.getElementById("themeDarkBtn");
-  if (bL) bL.classList.toggle("active", theme === "light");
-  if (bD) bD.classList.toggle("active", theme === "dark");
+  els.themeLightBtn?.classList.toggle("active", theme === "light");
+  els.themeDarkBtn?.classList.toggle("active", theme === "dark");
 }
-function initTheme() {
-  const saved = localStorage.getItem("quizzy_theme");
-  applyTheme(saved === "light" ? "light" : "dark");
+function readSettingsFromUI() {
+  state.settings.topic = els.topic?.value || "ai";
+  state.settings.amount = Number(els.amount?.value || 10);
+  state.settings.timeLimit = Number(els.timeLimit?.value || 0);
+  state.settings.shuffle = (els.shuffle?.value || "yes") === "yes";
+  state.settings.mode = els.mode?.value || "normal";
 }
-let engine = null;
-let timerId = null;
-let timeLeft = 0;
-let reveal = null;
-let gameMode = "normal";
-let streak = 0;
-function stopTimer() {
-  if (timerId) clearInterval(timerId);
-  timerId = null;
+function clearTimer() {
+  if (state.timerId) clearInterval(state.timerId);
+  state.timerId = null;
 }
-function startTimerIfNeeded() {
-  stopTimer();
-  reveal = null;
-  const limit = engine.timeLimitSec;
-  const hasTimer = limit > 0;
-  if (!hasTimer) {
-    render();
+function startTimer() {
+  clearTimer();
+  const limit = state.settings.timeLimit;
+  if (!limit || limit <= 0) {
+    els.timer?.classList.add("hidden");
     return;
   }
-  timeLeft = limit;
-  render();
-  timerId = setInterval(() => {
-    timeLeft--;
-    const { index, total } = engine.progress();
-    renderTopbar({ index, total, timeLeft, hasTimer: true });
-    const timerEl = el("timer");
-    if (timerEl && timeLeft <= 5) timerEl.classList.add("danger");
-    if (timerEl && timeLeft > 5) timerEl.classList.remove("danger");
-    if (timeLeft <= 0) {
-      engine.skip();
-      startTimerIfNeeded();
+  state.timerLeft = limit;
+  els.timer?.classList.remove("hidden");
+  els.timer.textContent = String(state.timerLeft);
+  els.timer.classList.remove("danger");
+  state.timerId = setInterval(() => {
+    state.timerLeft -= 1;
+    els.timer.textContent = String(state.timerLeft);
+    if (state.timerLeft <= 5) els.timer.classList.add("danger");
+    if (state.timerLeft <= 0) {
+      clearTimer();
+      applyModePenaltyOnWrong();
+      goNext(true);
     }
   }, 1000);
 }
-function render() {
-  const { index, total } = engine.progress();
-  const q = engine.current();
-  const chosen = engine.getChosen(q.id);
-  const hasTimer = engine.timeLimitSec > 0;
-  renderTopbar({ index, total, timeLeft, hasTimer });
-  renderQuestion({
-    q,
-    chosen,
-    revealState: reveal,
-    onChoose: (ans) => {
-      engine.select(ans);
-      const correct = ans === q.correct;
-      switch (gameMode) {
-        case "exam":
-          if (!correct && engine.timeLimitSec > 0) {
-            timeLeft = Math.max(0, timeLeft - 5);
-          }
-          break;
-        case "streak":
-          if (correct) {
-            streak += 1;
-            if (engine.timeLimitSec > 0 && streak % 3 === 0) {
-              timeLeft += 5;
-            }
-          } else {
-            streak = 0;
-          }
-          break;
-        default:
-          break;
+function applyModePenaltyOnWrong() {
+  if (state.settings.mode === "exam" && state.settings.timeLimit > 0) {
+    // -5 sec, but not below 0
+    state.timerLeft = Math.max(0, state.timerLeft - 5);
+    if (els.timer && !els.timer.classList.contains("hidden")) {
+      els.timer.textContent = String(state.timerLeft);
+      if (state.timerLeft <= 5) els.timer.classList.add("danger");
+    }
+  }
+}
+function applyModeBonusOnCorrect() {
+  if (state.settings.mode === "streak" && state.settings.timeLimit > 0) {
+    if (state.streak > 0 && state.streak % 3 === 0) {
+      state.timerLeft += 5;
+      if (els.timer && !els.timer.classList.contains("hidden")) {
+        els.timer.textContent = String(state.timerLeft);
       }
-      reveal = { correct: q.correct, chosen: ans };
-      el("hint").textContent = correct
-        ? "Правильно!"
-        : (gameMode === "exam" && engine.timeLimitSec > 0)
-          ? "Помилка! −5 секунд"
-          : "Неправильно";
-      stopTimer();
-      setTimeout(() => {
-        reveal = null;
-        el("hint").textContent = "";
-        engine.next();
-        startTimerIfNeeded();
-      }, 700);
     }
+  }
+}
+function updateProgress() {
+  const total = state.questions.length || 0;
+  const current = Math.min(state.index + 1, total);
+  if (els.progressText) els.progressText.textContent = `${current}/${total}`;
+  const pct = total ? Math.round((current / total) * 100) : 0;
+  if (els.progressFill) els.progressFill.style.width = `${pct}%`;
+}
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+function renderQuestion() {
+  const q = state.questions[state.index];
+  if (!q) return;
+  updateProgress();
+  if (els.category) els.category.textContent = q.category || "";
+  if (els.question) els.question.textContent = q.question || "";
+  if (els.hint) els.hint.textContent = "";
+  const chosen = state.chosen.get(q.id);
+  els.answers.innerHTML = "";
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement("div");
+    btn.className = "answer";
+    btn.setAttribute("role", "button");
+    btn.setAttribute("tabindex", "0");
+    btn.dataset.answer = a;
+    btn.innerHTML = `<b>${i + 1}.</b> ${escapeHtml(a)}`;
+    if (chosen && chosen === a) btn.classList.add("solidPick");
+    btn.addEventListener("click", () => pickAnswer(a));
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") pickAnswer(a);
+    });
+    els.answers.appendChild(btn);
   });
+  startTimer();
 }
-async function refreshHistoryFromServer() {
-  const list = await loadResults();
-  renderHistory(el("history"), list);
-}
-function calculateStats(results) {
-  const totalGames = results.length;
-  if (!totalGames) return null;
-  let sum = 0;
-  const byTopic = {};
-  results.forEach((r) => {
-    const percent = Number(r.percent) || 0;
-    sum += percent;
-    if (!byTopic[r.topic]) {
-      byTopic[r.topic] = { games: 0, avgSum: 0, best: percent, worst: percent };
+function pickAnswer(answer) {
+  const q = state.questions[state.index];
+  if (!q) return;
+  state.chosen.set(q.id, answer);
+  [...els.answers.querySelectorAll(".answer")].forEach(el => {
+    el.classList.remove("correct", "wrong");
+    const a = el.dataset.answer;
+    if (a === q.correct) el.classList.add("correct");
+    if (a === answer && a !== q.correct) el.classList.add("wrong");
+  });
+  const isCorrect = answer === q.correct;
+  if (!q.__scored) {
+    q.__scored = true;
+    if (isCorrect) {
+      state.correctCount += 1;
+      state.streak += 1;
+      applyModeBonusOnCorrect();
+    } else {
+      state.streak = 0;
+      applyModePenaltyOnWrong();
     }
-    byTopic[r.topic].games += 1;
-    byTopic[r.topic].avgSum += percent;
-    byTopic[r.topic].best = Math.max(byTopic[r.topic].best, percent);
-    byTopic[r.topic].worst = Math.min(byTopic[r.topic].worst, percent);
-  });
-  const average = Math.round(sum / totalGames);
-  const byTopicRows = Object.entries(byTopic).map(([topic, t]) => ({
-    topic,
-    games: t.games,
-    avg: Math.round(t.avgSum / t.games),
-    best: t.best,
-    worst: t.worst
-  }));
-  byTopicRows.sort((a, b) => (b.games - a.games) || (b.avg - a.avg));
-  return { totalGames, average, byTopicRows };
+  }
+  if (els.hint) {
+    els.hint.textContent = isCorrect ? "Правильно." : `Неправильно. Правильна відповідь: ${q.correct}`;
+  }
 }
-async function openStats() {
-  const results = await loadResults();
-  const stats = calculateStats(results);
-  if (!stats) {
-    el("statsSummary").innerHTML = `<div class="muted">Немає даних для статистики.</div>`;
-    el("statsByTopic").innerHTML = "";
-    el("statsLast").innerHTML = "";
-    show("screenStats");
+function goPrev() {
+  if (state.index <= 0) return;
+  state.index -= 1;
+  renderQuestion();
+}
+function goNext(force = false) {
+  const q = state.questions[state.index];
+  if (!q) return;
+  if (!force) {
+    if (!state.chosen.get(q.id)) {
+    }
+  }
+  if (state.index >= state.questions.length - 1) {
+    finishQuiz();
     return;
   }
-  el("statsSummary").innerHTML = `
-    <div class="stat"><b>${stats.totalGames}</b><span class="muted">Ігор</span></div>
-    <div class="stat"><b>${stats.average}%</b><span class="muted">Середній результат</span></div>
-  `;
-  el("statsByTopic").innerHTML = stats.byTopicRows.map(t => `
-    <div class="histItem">
-      <b>${t.topic}</b>
-      <span class="muted">${t.avg}% avg • ${t.games} games • best ${t.best}% • worst ${t.worst}%</span>
-    </div>
-  `).join("");
-  const last10 = results.slice(-10).reverse();
-  el("statsLast").innerHTML = last10.map(r => `
-    <div class="histItem">
-      <b>${r.topic}</b>
-      <span class="muted">${r.correct}/${r.total} • ${r.percent}%</span>
-    </div>
-  `).join("");
-  show("screenStats");
+  state.index += 1;
+  renderQuestion();
+}
+function skipQuestion() {
+  goNext(true);
 }
 async function startQuiz() {
-  const topic = el("topic").value;
-  const amount = Number(el("amount").value);
-  const timeLimitSec = Number(el("timeLimit").value);
-  const shuffleAnswers = el("shuffle").value === "yes";
-  gameMode = el("mode")?.value || "normal";
-  streak = 0;
-  const questions = await loadQuestions({ topic, amount, shuffleAnswers });
-  if (!questions.length) {
-    alert("Немає питань для цієї теми. Додай питання на сервер або в локальну базу.");
+  readSettingsFromUI();
+  const qs = await loadQuestions({
+    topic: state.settings.topic,
+    amount: state.settings.amount,
+    shuffleAnswers: state.settings.shuffle
+  });
+  if (!qs || !qs.length) {
+    alert("Немає питань для цієї теми. Перевір localQuestions.js або сервер /api/questions");
     return;
   }
-  engine = createEngine(questions, { timeLimitSec });
-  show("screenQuiz");
-  el("hint").textContent = "";
-  startTimerIfNeeded();
+  state.questions = qs.map(q => ({ ...q, __scored: false }));
+  state.index = 0;
+  state.chosen = new Map();
+  state.correctCount = 0;
+  state.streak = 0;
+  showScreen("quiz");
+  renderQuestion();
 }
 async function finishQuiz() {
-  stopTimer();
-  const result = engine.evaluate();
-  const topic = el("topic").value;
-  await saveResult({
-    topic,
-    mode: gameMode,
-    total: result.total,
-    correct: result.correct,
-    percent: result.percent
-  });
-  el("summary").innerHTML = `
-    <div class="stat"><b>${result.correct}/${result.total}</b><span class="muted">Correct</span></div>
-    <div class="stat"><b>${result.wrong}</b><span class="muted">Wrong</span></div>
-    <div class="stat"><b>${result.percent}%</b><span class="muted">Score</span></div>
-    <div class="stat"><b>${gameMode}</b><span class="muted">Mode</span></div>
+  clearTimer();
+  const total = state.questions.length || 0;
+  const correct = state.correctCount;
+  const payload = {
+    ts: Date.now(),
+    topic: state.settings.topic,
+    mode: state.settings.mode,
+    total,
+    correct
+  };
+  await saveResult(payload);
+  renderResult(payload);
+  showScreen("result");
+  await refreshHistory();
+}
+function renderResult(payload) {
+  const pct = payload.total ? Math.round((payload.correct / payload.total) * 100) : 0;
+  els.summary.innerHTML = `
+    <div class="stat"><span class="muted small">Topic</span><b>${escapeHtml(payload.topic.toUpperCase())}</b></div>
+    <div class="stat"><span class="muted small">Mode</span><b>${escapeHtml(payload.mode)}</b></div>
+    <div class="stat"><span class="muted small">Score</span><b>${payload.correct}/${payload.total} (${pct}%)</b></div>
   `;
-  renderStats(el("stats"), result.statsByCategory);
-  show("screenResult");
+  const byCat = new Map();
+  for (const q of state.questions) {
+    const c = q.category || "General";
+    const rec = byCat.get(c) || { total: 0, correct: 0 };
+    rec.total += 1;
+    const chosen = state.chosen.get(q.id);
+    if (chosen && chosen === q.correct) rec.correct += 1;
+    byCat.set(c, rec);
+  }
+  els.stats.innerHTML = "";
+  for (const [cat, rec] of byCat.entries()) {
+    const div = document.createElement("div");
+    div.className = "histItem";
+    div.innerHTML = `<div><b>${escapeHtml(cat)}</b><div class="muted small">${rec.correct}/${rec.total}</div></div>`;
+    els.stats.appendChild(div);
+  }
 }
-async function backToSetup() {
-  stopTimer();
-  await refreshHistoryFromServer();
-  show("screenSetup");
+function quitQuiz() {
+  clearTimer();
+  showScreen("setup");
 }
-function bindHotkeys() {
-  document.addEventListener("keydown", (e) => {
-    const quizActive = document.getElementById("screenQuiz")?.classList.contains("active");
-    if (!quizActive || !engine) return;
-    const tag = document.activeElement?.tagName;
-    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
-    switch (e.key) {
-      case "ArrowRight":
-      case "Enter":
-        engine.next();
-        startTimerIfNeeded();
-        break;
-      case "ArrowLeft":
-        engine.prev();
-        startTimerIfNeeded();
-        break;
-      case "Escape":
-        backToSetup();
-        break;
-      case "1":
-      case "2":
-      case "3":
-      case "4": {
-        const idx = Number(e.key) - 1;
-        const q = engine.current();
-        const ans = q?.answers?.[idx];
-        if (!ans) return;
-        const correct = ans === q.correct;
-        engine.select(ans);
-        switch (gameMode) {
-          case "exam":
-            if (!correct && engine.timeLimitSec > 0) timeLeft = Math.max(0, timeLeft - 5);
-            break;
-          case "streak":
-            if (correct) {
-              streak += 1;
-              if (engine.timeLimitSec > 0 && streak % 3 === 0) timeLeft += 5;
-            } else streak = 0;
-            break;
-          default:
-            break;
-        }
-        reveal = { correct: q.correct, chosen: ans };
-        el("hint").textContent = correct
-          ? "Правильно!"
-          : (gameMode === "exam" && engine.timeLimitSec > 0)
-            ? "Помилка! −5 секунд"
-            : "Неправильно";
-        stopTimer();
-        setTimeout(() => {
-          reveal = null;
-          el("hint").textContent = "";
-          engine.next();
-          startTimerIfNeeded();
-        }, 700);
-        break;
-      }
-    }
+function clearHistoryLocal() {
+  localStorage.removeItem("quizzy_local_results");
+}
+function saveLocalHistoryFallback(list) {
+  localStorage.setItem("quizzy_local_results", JSON.stringify(list));
+}
+function readLocalHistoryFallback() {
+  try {
+    return JSON.parse(localStorage.getItem("quizzy_local_results") || "[]");
+  } catch {
+    return [];
+  }
+}
+async function refreshHistory() {
+  let list = await loadResults();
+  if (!Array.isArray(list) || !list.length) {
+    list = readLocalHistoryFallback();
+  } else {
+    saveLocalHistoryFallback(list);
+  }
+  els.history.innerHTML = "";
+  if (!list.length) {
+    els.history.innerHTML = `<div class="muted small">Немає результатів.</div>`;
+    return;
+  }
+  const last = [...list].sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 6);
+  last.forEach(r => {
+    const dt = r.ts ? new Date(r.ts).toLocaleString() : "";
+    const div = document.createElement("div");
+    div.className = "histItem";
+    div.innerHTML = `
+      <div>
+        <b>${escapeHtml((r.topic || "topic").toUpperCase())}</b>
+        <div class="muted small">${escapeHtml(r.mode || "normal")} • ${dt}</div>
+      </div>
+      <div><b>${r.correct}/${r.total}</b></div>
+    `;
+    els.history.appendChild(div);
+  });
+}
+async function openStatsPage() {
+  showScreen("stats");
+  let list = await loadResults();
+  if (!Array.isArray(list) || !list.length) list = readLocalHistoryFallback();
+  const totalGames = list.length;
+  const avg = totalGames
+    ? Math.round(list.reduce((s, r) => s + (r.total ? (r.correct / r.total) : 0), 0) / totalGames * 100)
+    : 0;
+  els.statsSummary.innerHTML = `
+    <div class="stat"><span class="muted small">Games</span><b>${totalGames}</b></div>
+    <div class="stat"><span class="muted small">Avg score</span><b>${avg}%</b></div>
+  `;
+  const byTopic = new Map();
+  for (const r of list) {
+    const t = r.topic || "unknown";
+    const rec = byTopic.get(t) || { games: 0, total: 0, correct: 0 };
+    rec.games += 1;
+    rec.total += (r.total || 0);
+    rec.correct += (r.correct || 0);
+    byTopic.set(t, rec);
+  }
+  els.statsByTopic.innerHTML = "";
+  for (const [t, rec] of byTopic.entries()) {
+    const pct = rec.total ? Math.round((rec.correct / rec.total) * 100) : 0;
+    const div = document.createElement("div");
+    div.className = "histItem";
+    div.innerHTML = `<div><b>${escapeHtml(t.toUpperCase())}</b><div class="muted small">${rec.games} games</div></div><div><b>${pct}%</b></div>`;
+    els.statsByTopic.appendChild(div);
+  }
+  els.statsLast.innerHTML = "";
+  const last10 = [...list].sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 10);
+  last10.forEach(r => {
+    const dt = r.ts ? new Date(r.ts).toLocaleString() : "";
+    const pct = r.total ? Math.round((r.correct / r.total) * 100) : 0;
+    const div = document.createElement("div");
+    div.className = "histItem";
+    div.innerHTML = `
+      <div><b>${escapeHtml((r.topic||"topic").toUpperCase())}</b><div class="muted small">${dt} • ${escapeHtml(r.mode||"")}</div></div>
+      <div><b>${pct}%</b></div>
+    `;
+    els.statsLast.appendChild(div);
   });
 }
 function wire() {
-  // Theme
-  initTheme();
-  document.getElementById("themeLightBtn")?.addEventListener("click", () => applyTheme("light"));
-  document.getElementById("themeDarkBtn")?.addEventListener("click", () => applyTheme("dark"));
-  el("startBtn")?.addEventListener("click", startQuiz);
-  el("openStatsBtn")?.addEventListener("click", openStats);
-  el("clearHistoryBtn")?.addEventListener("click", () => {
-    renderHistory(el("history"), []);
-    alert("Це очищає лише UI. Для повного очищення серверної історії — потрібно endpoint або очистити db.");
+  const saved = localStorage.getItem("quizzy_theme");
+  setTheme(saved === "light" ? "light" : "dark");
+  els.themeLightBtn?.addEventListener("click", () => setTheme("light"));
+  els.themeDarkBtn?.addEventListener("click", () => setTheme("dark"));
+  els.startBtn?.addEventListener("click", startQuiz);
+  els.openStatsBtn?.addEventListener("click", openStatsPage);
+  els.goStatsBtn?.addEventListener("click", openStatsPage);
+  els.backFromStatsBtn?.addEventListener("click", () => showScreen("setup"));
+  els.prevBtn?.addEventListener("click", goPrev);
+  els.nextBtn?.addEventListener("click", () => goNext(false));
+  els.skipBtn?.addEventListener("click", skipQuestion);
+  els.finishBtn?.addEventListener("click", finishQuiz);
+  els.quitBtn?.addEventListener("click", quitQuiz);
+  els.restartBtn?.addEventListener("click", startQuiz);
+  els.backBtn?.addEventListener("click", () => showScreen("setup"));
+  els.clearHistoryBtn?.addEventListener("click", async () => {
+    clearHistoryLocal();
+    await refreshHistory();
   });
-  el("prevBtn")?.addEventListener("click", () => {
-    if (!engine) return;
-    engine.prev();
-    startTimerIfNeeded();
+  window.addEventListener("keydown", (e) => {
+    if (!els.screenQuiz.classList.contains("active")) return;
+    if (e.key === "Escape") quitQuiz();
+    if (e.key === "ArrowLeft") goPrev();
+    if (e.key === "ArrowRight") goNext(false);
+    const n = Number(e.key);
+    if (n >= 1 && n <= 4) {
+      const q = state.questions[state.index];
+      if (!q) return;
+      const ans = q.answers[n - 1];
+      if (ans) pickAnswer(ans);
+    }
   });
-  el("nextBtn")?.addEventListener("click", () => {
-    if (!engine) return;
-    engine.next();
-    startTimerIfNeeded();
-  });
-  el("skipBtn")?.addEventListener("click", () => {
-    if (!engine) return;
-    engine.skip();
-    startTimerIfNeeded();
-  });
-  el("finishBtn")?.addEventListener("click", async () => {
-    if (!engine) return;
-    if (engine.canFinish()) await finishQuiz();
-  });
-  el("quitBtn")?.addEventListener("click", backToSetup);
-  el("restartBtn")?.addEventListener("click", startQuiz);
-  el("backBtn")?.addEventListener("click", backToSetup);
-  el("goStatsBtn")?.addEventListener("click", openStats);
-  el("backFromStatsBtn")?.addEventListener("click", backToSetup);
-  bindHotkeys();
+  refreshHistory();
 }
-window.addEventListener("DOMContentLoaded", async () => {
-  wire();
-  await refreshHistoryFromServer();
-});
+document.addEventListener("DOMContentLoaded", wire);
