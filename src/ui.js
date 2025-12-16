@@ -10,7 +10,7 @@ export function renderHistory(container, history) {
   container.innerHTML = history.map(h => `
     <div class="histItem">
       <div><b>${h.correct}/${h.total}</b> (${h.percent}%)</div>
-      <div class="kv">${new Date(h.date).toLocaleString()}</div>
+      <div class="kv">${new Date(h.date).toLocaleString()} • ${String(h.topic).toUpperCase()}</div>
     </div>
   `).join("");
 }
