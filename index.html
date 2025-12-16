@@ -55,10 +55,22 @@
                 <option value="no">Ні</option>
               </select>
             </label>
+            <label class="field">
+              <span>Режим гри</span>
+              <select id="mode">
+                <option value="normal" selected>Normal</option>
+                <option value="exam">Exam (помилка = −5 сек)</option>
+                <option value="streak">Streak (бонус за серію)</option>
+              </select>
+            </label>
+            <div class="field" aria-hidden="true"></div>
           </div>
           <div class="row">
-            <button id="startBtn" class="btn primary">Start quiz</button>
-            <button id="clearHistoryBtn" class="btn ghost">Clear history</button>
+            <button id="startBtn" class="btn primary" type="button">Start quiz</button>
+            <button id="openStatsBtn" class="btn ghost" type="button">Statistics</button>
+            <button id="clearHistoryBtn" class="btn ghost" type="button">Clear history</button>
+          </div>
+          <div class="muted smallNote">
           </div>
         </div>
         <aside class="rightPane">
@@ -77,7 +89,7 @@
         </div>
         <div class="rightInfo">
           <div id="timer" class="timer hidden">20</div>
-          <button id="quitBtn" class="btn ghost small">Quit</button>
+          <button id="quitBtn" class="btn ghost small" type="button">Quit</button>
         </div>
       </div>
       <div class="quizGrid">
@@ -91,10 +103,10 @@
         </div>
       </div>
       <div class="row navRow">
-        <button id="prevBtn" class="btn ghost">Prev</button>
-        <button id="skipBtn" class="btn ghost">Skip</button>
-        <button id="nextBtn" class="btn ghost">Next</button>
-        <button id="finishBtn" class="btn primary">Finish</button>
+        <button id="prevBtn" class="btn ghost" type="button">Prev</button>
+        <button id="skipBtn" class="btn ghost" type="button">Skip</button>
+        <button id="nextBtn" class="btn ghost" type="button">Next</button>
+        <button id="finishBtn" class="btn primary" type="button">Finish</button>
       </div>
       <div id="hint" class="hint"></div>
       <div class="hotkeys muted">Keys: ← → Enter • 1–4 • Esc</div>
@@ -103,21 +115,33 @@
       <h2 class="title">Результат</h2>
       <div id="summary" class="summary"></div>
       <div class="row">
-        <button id="restartBtn" class="btn primary">Play again</button>
-        <button id="backBtn" class="btn ghost">Back</button>
+        <button id="restartBtn" class="btn primary" type="button">Play again</button>
+        <button id="backBtn" class="btn ghost" type="button">Back</button>
+        <button id="goStatsBtn" class="btn ghost" type="button">Statistics</button>
       </div>
-      <div class="paneTitle">Статистика</div>
+      <div class="paneTitle">Статистика (за категоріями цього квізу)</div>
       <div id="stats" class="history"></div>
     </section>
+    <section id="screenStats" class="card screen">
+      <h2 class="title">Статистика</h2>
+      <div id="statsSummary" class="summary"></div>
+      <div class="paneTitle">Результати по темах</div>
+      <div id="statsByTopic" class="history"></div>
+      <div class="paneTitle">Останні 10 ігор</div>
+      <div id="statsLast" class="history"></div>
+      <div class="row">
+        <button id="backFromStatsBtn" class="btn ghost" type="button">Back</button>
+      </div>
+    </section>
     <footer class="foot">
-      <div class="footLeft">
-        <span>Quizzy ©</span>
-        <span class="muted">Run locally or via GitHub Pages</span>
-      </div>
-      <div class="polaroidBar" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
+      <span>Quizzy ©</span>
+      <span class="muted">Run locally or via GitHub Pages</span>
     </footer>
+  </div>
+  <div class="polaroidDock" aria-hidden="true">
+    <div class="polaroidBar">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
   </div>
   <script type="module" src="./src/main.js"></script>
 </body>
