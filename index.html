@@ -9,33 +9,18 @@
 <body>
   <div class="app">
     <header class="top">
-  <div class="brand">
-    <div class="logo">Q</div>
-    <div>
-      <h1>Quizzy</h1>
-      <p class="sub">AI • JavaScript • Movies</p>
-    </div>
-  </div>
-  <div class="meta">
-    <div class="chips">
-    </div>
-    <div class="themeSwitch" role="group" aria-label="Theme switch">
-      <button id="themeLightBtn" class="tbtn" type="button">Light</button>
-      <button id="themeDarkBtn" class="tbtn" type="button">Dark</button>
-    </div>
-  </div>
-</header>
       <div class="brand">
         <div class="logo">Q</div>
         <div>
           <h1>Quizzy</h1>
-          <p class="sub">AI • JavaScript • Movies — frontend + backend (Express)</p>
+          <p class="sub">AI • JavaScript • Movies</p>
         </div>
       </div>
-      <div class="chips">
-        <span class="chip">ES Modules</span>
-        <span class="chip">fetch / JSON</span>
-        <span class="chip">try/catch</span>
+      <div class="meta">
+        <div class="themeSwitch" role="group" aria-label="Theme switch">
+          <button id="themeLightBtn" class="tbtn" type="button">Light</button>
+          <button id="themeDarkBtn" class="tbtn" type="button">Dark</button>
+        </div>
       </div>
     </header>
     <section id="screenSetup" class="card screen active">
@@ -75,10 +60,10 @@
         </label>
       </div>
       <div class="row">
-        <button id="startBtn" class="btn primary">Start quiz</button>
-        <button id="clearHistoryBtn" class="btn ghost">Clear history</button>
+        <button id="startBtn" class="btn primary" type="button">Start quiz</button>
+        <button id="clearHistoryBtn" class="btn ghost" type="button">Clear history</button>
       </div>
-      <h3 class="subtitle">Останні результати (з сервера)</h3>
+      <h3 class="subtitle">Останні результати</h3>
       <div id="history" class="history"></div>
     </section>
     <section id="screenQuiz" class="card screen">
@@ -91,7 +76,7 @@
         </div>
         <div class="rightInfo">
           <div id="timer" class="timer hidden">20</div>
-          <button id="quitBtn" class="btn ghost small">Quit</button>
+          <button id="quitBtn" class="btn ghost small" type="button">Quit</button>
         </div>
       </div>
       <div class="qCard">
@@ -100,10 +85,10 @@
       </div>
       <div id="answers" class="answers"></div>
       <div class="row">
-        <button id="prevBtn" class="btn ghost">Prev</button>
-        <button id="skipBtn" class="btn ghost">Skip</button>
-        <button id="nextBtn" class="btn ghost">Next</button>
-        <button id="finishBtn" class="btn primary">Finish</button>
+        <button id="prevBtn" class="btn ghost" type="button">Prev</button>
+        <button id="skipBtn" class="btn ghost" type="button">Skip</button>
+        <button id="nextBtn" class="btn ghost" type="button">Next</button>
+        <button id="finishBtn" class="btn primary" type="button">Finish</button>
       </div>
       <div id="hint" class="hint"></div>
     </section>
@@ -111,15 +96,15 @@
       <h2 class="title">Результат</h2>
       <div id="summary" class="summary"></div>
       <div class="row">
-        <button id="restartBtn" class="btn primary">Play again</button>
-        <button id="backBtn" class="btn ghost">Back to setup</button>
+        <button id="restartBtn" class="btn primary" type="button">Play again</button>
+        <button id="backBtn" class="btn ghost" type="button">Back to setup</button>
       </div>
       <h3 class="subtitle">Статистика за категоріями</h3>
       <div id="stats" class="history"></div>
     </section>
     <footer class="foot">
       <span>Quizzy ©</span>
-      <span class="muted">Run: npm i → npm run dev → http://localhost:3000</span>
+      <span class="muted">Run locally or GitHub Pages</span>
     </footer>
   </div>
   <script type="module" src="./src/main.js"></script>
