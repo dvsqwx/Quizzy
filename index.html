@@ -3,170 +3,175 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quizzy | Interactive</title>
+  <title>Quizzy | Web3 Style</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
   <div id="canvas-container"></div>
 
-  <div class="noise-overlay"></div>
-
-  <main class="app glass-panel">
+  <main class="app-container">
     
-    <header class="hero">
-      <div class="heroInner">
-        <div class="heroTop">
-          <div class="heroBrand">
-            <h1 class="wordmark">QUIZZY</h1>
-          </div>
-          <div class="themeSwitch" role="group" aria-label="Theme switch" style="opacity: 0.5;">
-            <button id="themeLightBtn" class="tbtn" type="button">L</button>
-            <button id="themeDarkBtn" class="tbtn active" type="button">D</button>
-          </div>
+    <header class="navbar">
+        <div class="brand">
+            <div class="logo-mark">Q</div>
+            <span class="logo-text">QUIZZY</span>
         </div>
         
-        <div class="heroActions">
-          <button id="startBtn" class="cta primary" type="button">Start Experience</button>
-          <button id="openStatsBtn" class="cta ghost" type="button">Statistics</button>
+        <div class="nav-actions">
+            <div class="theme-toggle" style="display: none;">
+                <button id="themeLightBtn">L</button>
+                <button id="themeDarkBtn">D</button>
+            </div>
+            <button id="openStatsBtn" class="nav-link">Statistics</button>
+            <button id="startBtn" class="btn-primary-nav">Connect Quiz</button>
         </div>
-      </div>
     </header>
 
-    <section id="screenSetup" class="screen active">
-      <div class="panelHead">
-        <h2 class="panelTitle">Конфигурация</h2>
-      </div>
-      
-      <div class="layout">
-        <div class="left">
-          <div class="formGrid">
-            <label class="field">
-              <span>Тема</span>
-              <select id="topic">
-                <option value="js">JavaScript Core</option>
-                <option value="movies">Cinematography</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Питання</span>
-              <select id="amount">
-                <option value="5">5</option>
-                <option value="10" selected>10</option>
-                <option value="15">15</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Таймер</span>
-              <select id="timeLimit">
-                <option value="0">Вимкнено</option>
-                <option value="20" selected>20 сек</option>
-                <option value="30">30 сек</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Рандомізація</span>
-              <select id="shuffle">
-                <option value="yes" selected>Так</option>
-                <option value="no">Ні</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Режим</span>
-              <select id="mode">
-                <option value="normal" selected>Normal</option>
-                <option value="exam">Exam (-5s penalty)</option>
-                <option value="streak">Streak (+5s bonus)</option>
-              </select>
-            </label>
-          </div>
-          <div class="row" style="margin-top: 20px;">
-            <button id="clearHistoryBtn" class="btn ghost small-btn" type="button">Clear history</button>
-          </div>
-        </div>
+    <div class="content-wrapper">
 
-        <aside class="right">
-          <div class="sideTitle">Останні запуски</div>
-          <div id="history" class="history"></div>
-        </aside>
-      </div>
-    </section>
+        <section id="screenSetup" class="screen active card-panel">
+            <h1 class="hero-title">WELCOME TO <br> THE QUIZ VERSE</h1>
+            
+            <div class="setup-grid">
+                <div class="setup-controls">
+                    <label class="input-group">
+                        <span class="label-text">Select Topic</span>
+                        <div class="select-wrapper">
+                            <select id="topic">
+                                <option value="js">JavaScript Core</option>
+                                <option value="movies">Cinematography</option>
+                            </select>
+                        </div>
+                    </label>
 
-    <section id="screenQuiz" class="screen">
-      <div class="quizTop">
-        <div class="progressWrap">
-          <div id="progressText" class="muted small">1 / 10</div>
-          <div class="bar"><div id="progressFill" class="fill"></div></div>
-        </div>
-        <div class="rightInfo">
-          <div id="timer" class="timer hidden">20</div>
-          <button id="quitBtn" class="btn text-only" type="button">Вихід</button>
-        </div>
-      </div>
+                    <div class="row-inputs">
+                        <label class="input-group">
+                            <span class="label-text">Questions</span>
+                            <div class="select-wrapper">
+                                <select id="amount">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="15">15</option>
+                                </select>
+                            </div>
+                        </label>
 
-      <div class="quizLayout">
-        <div class="qBlock">
-          <div id="category" class="muted small upper">Category</div>
-          <h2 id="question" class="qTitle">Loading...</h2>
-          <div id="hint" class="muted small hint"></div>
-        </div>
-        
-        <div class="aBlock">
-          <div class="sideTitle">Варіанти відповіді</div>
-          <div id="answers" class="answers-grid"></div>
-          
-          <div class="nav-controls">
-            <button id="skipBtn" class="btn ghost" type="button">Skip</button>
-            <button id="nextBtn" class="btn solid" type="button">Next &rarr;</button>
-            <button id="finishBtn" class="btn solid hidden" type="button">Finish</button>
-            <button id="prevBtn" class="btn ghost hidden" style="display:none" type="button">Prev</button>
-          </div>
-        </div>
-      </div>
-    </section>
+                        <label class="input-group">
+                            <span class="label-text">Timer</span>
+                            <div class="select-wrapper">
+                                <select id="timeLimit">
+                                    <option value="0">No Limit</option>
+                                    <option value="20" selected>20s</option>
+                                    <option value="30">30s</option>
+                                </select>
+                            </div>
+                        </label>
+                    </div>
 
-    <section id="screenResult" class="screen">
-      <div class="panelHead">
-        <h2 class="panelTitle">Результат сесії</h2>
-      </div>
-      <div id="summary" class="summary-grid"></div>
-      
-      <div class="row centered-actions">
-        <button id="restartBtn" class="btn solid" type="button">Зіграти знову</button>
-        <button id="backBtn" class="btn ghost" type="button">Меню</button>
-        <button id="goStatsBtn" class="btn ghost" type="button">Статистика</button>
-      </div>
+                    <label class="input-group">
+                        <span class="label-text">Mode</span>
+                        <div class="select-wrapper">
+                            <select id="mode">
+                                <option value="normal" selected>Normal</option>
+                                <option value="exam">Hardcore (-5s)</option>
+                                <option value="streak">Streak (+5s)</option>
+                            </select>
+                        </div>
+                    </label>
 
-      <div class="stats-container">
-        <div class="sideTitle">Деталі по категоріях</div>
-        <div id="stats" class="history"></div>
-      </div>
-    </section>
+                    <select id="shuffle" style="display:none;"><option value="yes" selected>Yes</option></select>
 
-    <section id="screenStats" class="screen">
-      <div class="panelHead">
-        <h2 class="panelTitle">Глобальна статистика</h2>
-      </div>
-      <div id="statsSummary" class="summary-grid"></div>
-      
-      <div class="stats-cols">
-        <div>
-           <div class="sideTitle">По темах</div>
-           <div id="statsByTopic" class="history"></div>
-        </div>
-        <div>
-           <div class="sideTitle">Історія (10)</div>
-           <div id="statsLast" class="history"></div>
-        </div>
-      </div>
-      
-      <div class="row">
-        <button id="backFromStatsBtn" class="btn ghost" type="button">← Назад</button>
-      </div>
-    </section>
+                    <div class="action-row">
+                        <button id="clearHistoryBtn" class="btn-link">Clear Data</button>
+                    </div>
+                </div>
+
+                <div class="setup-sidebar">
+                    <h3 class="sidebar-title">Recent Activity</h3>
+                    <div id="history" class="history-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="screenQuiz" class="screen card-panel">
+            <div class="quiz-header">
+                <div class="progress-block">
+                    <div class="progress-labels">
+                        <span class="progress-label">Progress</span>
+                        <span id="progressText">1 / 10</span>
+                    </div>
+                    <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+                </div>
+                <div class="timer-block">
+                    <span id="timer" class="timer-badge">20</span>
+                </div>
+            </div>
+
+            <div class="quiz-body">
+                <div class="question-area">
+                    <span id="category" class="tag">Topic</span>
+                    <h2 id="question" class="question-text">Loading question...</h2>
+                    <div id="hint" class="hint-text"></div>
+                </div>
+
+                <div class="answers-area">
+                    <div id="answers" class="answers-grid"></div>
+                </div>
+            </div>
+
+            <div class="quiz-footer">
+                <button id="quitBtn" class="btn-secondary">Quit</button>
+                <div class="nav-buttons">
+                    <button id="skipBtn" class="btn-secondary">Skip</button>
+                    <button id="nextBtn" class="btn-primary">Next Question</button>
+                    <button id="finishBtn" class="btn-primary hidden">Finish</button>
+                    <button id="prevBtn" class="hidden" style="display:none"></button>
+                </div>
+            </div>
+        </section>
+
+        <section id="screenResult" class="screen card-panel center-layout">
+            <h2 class="result-title">Session Complete</h2>
+            <div id="summary" class="summary-stats"></div>
+            
+            <div class="result-actions">
+                <button id="restartBtn" class="btn-primary large">Play Again</button>
+                <button id="backBtn" class="btn-secondary">Main Menu</button>
+                <button id="goStatsBtn" class="btn-link">View Full Stats</button>
+            </div>
+
+            <div class="result-details">
+                <h3>Performance Breakdown</h3>
+                <div id="stats" class="history-list"></div>
+            </div>
+        </section>
+
+        <section id="screenStats" class="screen card-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Global Statistics</h2>
+                <button id="backFromStatsBtn" class="btn-secondary small">Close</button>
+            </div>
+            
+            <div id="statsSummary" class="summary-stats"></div>
+            
+            <div class="stats-grid">
+                <div class="col">
+                   <h3>By Topic</h3>
+                   <div id="statsByTopic" class="history-list"></div>
+                </div>
+                <div class="col">
+                   <h3>Recent Games</h3>
+                   <div id="statsLast" class="history-list"></div>
+                </div>
+            </div>
+        </section>
+
+    </div> 
   </main>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="3d-background.js"></script>
   <script type="module" src="./src/main.js"></script>
