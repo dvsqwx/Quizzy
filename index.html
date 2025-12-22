@@ -3,223 +3,198 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quizzy | Premium Web3</title>
+  <title>Quizzy</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
   <div id="canvas-container"></div>
-  
-  <div class="grid-overlay"></div>
 
   <main class="app-container">
     
     <nav class="navbar">
-        <div class="brand">QUIZZY <span class="badge">PRO</span></div>
-        <div class="nav-right">
-             <button id="navStatsBtn" class="nav-link">Leaderboard</button>
-             <div class="connection-status">
-                 <span class="status-dot"></span> Connected
-             </div>
-        </div>
+        <div class="brand">QUIZZY</div>
+        <button id="navStatsBtn" class="nav-link">Leaderboard</button>
     </nav>
 
-    <section id="screenMenu" class="screen active full-height-center">
+    <section id="heroSection" class="hero-section">
         <div class="hero-content">
-            <h1 class="main-title">UNLOCK <br> KNOWLEDGE</h1>
-            <p class="subtitle">Next generation quiz interface for decentralized minds.</p>
-            
-            <div class="menu-actions">
-                <button id="toSetupBtn" class="btn-primary big-btn">
-                    Launch App <span class="arrow">→</span>
-                </button>
-                <button id="menuStatsBtn" class="btn-secondary big-btn">
-                    Statistics
-                </button>
-            </div>
+            <h1 class="main-title">YOUR QUIZ <br> UNIVERSE</h1>
+            <p class="subtitle">Master knowledge with our AI-powered platform.</p>
+            <button id="scrollToTopicsBtn" class="cta-btn">
+                Get Started <span class="arrow">↓</span>
+            </button>
         </div>
     </section>
 
-    <section id="screenSetup" class="screen modal-view">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2>Configuration</h2>
-                <button id="backToMenuBtn" class="close-btn">×</button>
-            </div>
-            
-            <div class="setup-grid">
-                <div class="setup-form">
-                    <div class="input-group">
-                        <label>Select Topic</label>
-                        <select id="topic" class="custom-select">
-                            <option value="js">JavaScript Core</option>
-                            <option value="movies">Cinematography</option>
-                        </select>
-                    </div>
-
-                    <div class="row-group">
-                        <div class="input-group">
-                            <label>Questions</label>
-                            <select id="amount" class="custom-select">
-                                <option value="5">5 Qs</option>
-                                <option value="10" selected>10 Qs</option>
-                                <option value="15">15 Qs</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Timer</label>
-                            <select id="timeLimit" class="custom-select">
-                                <option value="0">Off</option>
-                                <option value="20" selected>20s</option>
-                                <option value="30">30s</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label>Difficulty Mode</label>
-                        <select id="mode" class="custom-select">
-                            <option value="normal">Standard</option>
-                            <option value="exam">Hardcore (-5s penalty)</option>
-                            <option value="streak">Streak (+5s bonus)</option>
-                        </select>
-                    </div>
-
-                    <select id="shuffle" style="display:none"><option value="yes">Yes</option></select>
-
-                    <button id="startBtn" class="btn-primary full-width">
-                        Start Session
-                    </button>
+    <section id="topicsSection" class="topics-section">
+        <h2 class="section-title">Choose Your Path</h2>
+        
+        <div class="cards-grid">
+            <div class="topic-card card-yellow" data-topic="js">
+                <div class="card-icon">⚡</div>
+                <div class="card-info">
+                    <h3>JavaScript Core</h3>
+                    <p>Functions, Objects, ES6+</p>
                 </div>
+                <div class="card-arrow">↗</div>
+            </div>
 
-                <div class="setup-history">
-                    <div class="history-header">
-                        <span>Recent Logs</span>
-                        <button id="clearHistoryBtn" class="text-btn">Clear</button>
-                    </div>
-                    <div id="history" class="history-list"></div>
+            <div class="topic-card card-peach" data-topic="movies">
+                <div class="card-icon">🎬</div>
+                <div class="card-info">
+                    <h3>Cinematography</h3>
+                    <p>Directors, Oscars, Cult Classics</p>
+                </div>
+                <div class="card-arrow">↗</div>
+            </div>
+
+            <div class="topic-card card-teal disabled">
+                <div class="card-icon">🧪</div>
+                <div class="card-info">
+                    <h3>Science</h3>
+                    <p>Coming Soon</p>
+                </div>
+            </div>
+
+            <div class="topic-card card-purple disabled">
+                <div class="card-info">
+                    <h3>History</h3>
+                    <p>Coming Soon</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="screenQuiz" class="screen modal-view">
-        <div class="modal-card quiz-card">
+    <section id="quizSection" class="quiz-overlay">
+        <div class="quiz-container">
             <div class="quiz-header">
-                <div class="progress-container">
-                    <div class="progress-info">
-                        <span id="category" class="cat-badge">TOPIC</span>
-                        <span id="progressText">01 / 10</span>
-                    </div>
-                    <div class="progress-bar-bg"><div id="progressFill" class="progress-bar-fill"></div></div>
+                <div class="quiz-meta">
+                    <span id="categoryBadge" class="badge">TOPIC</span>
+                    <span id="progressText">1 / 10</span>
                 </div>
-                <div id="timer" class="timer-circle">20</div>
+                <button id="quitBtn" class="close-btn">✕</button>
             </div>
 
-            <div class="quiz-body">
-                <h2 id="question" class="question-text">Loading Data...</h2>
-                <div id="hint" class="hint-text"></div>
-                
-                <div id="answers" class="answers-layout"></div>
+            <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+
+            <div class="question-block">
+                <h2 id="question" class="question-text">Loading Question...</h2>
+                <div id="timer" class="timer-badge">20s</div>
             </div>
+
+            <div id="answers" class="answers-list">
+                </div>
 
             <div class="quiz-footer">
-                <button id="quitBtn" class="text-btn danger">Exit</button>
-                <div class="quiz-controls">
-                    <button id="skipBtn" class="btn-secondary small">Skip</button>
-                    <button id="nextBtn" class="btn-primary small">Next</button>
-                    <button id="finishBtn" class="btn-primary small hidden">Finish</button>
-                    <button id="prevBtn" class="hidden" style="display:none"></button>
-                </div>
+                <button id="skipBtn" class="text-btn">Skip</button>
+                <button id="nextBtn" class="cta-btn small">Next Question</button>
+                <button id="finishBtn" class="cta-btn small hidden">Finish Quiz</button>
             </div>
         </div>
     </section>
 
-    <section id="screenResult" class="screen modal-view">
-        <div class="modal-card result-card">
-            <div class="result-header">
-                <h2>Session Report</h2>
-            </div>
+    <section id="resultSection" class="quiz-overlay">
+        <div class="result-card">
+            <h2 class="result-title">Quiz Complete!</h2>
             
-            <div id="summary" class="summary-grid"></div>
+            <div class="score-circle">
+                <span id="finalScore">0</span>
+                <span class="total">/ 10</span>
+            </div>
+
+            <div class="stats-summary">
+                <div class="stat-box correct">
+                    <span class="icon">✓</span>
+                    <span id="correctCount">0</span> Correct
+                </div>
+                <div class="stat-box wrong">
+                    <span class="icon">✕</span>
+                    <span id="wrongCount">0</span> Wrong
+                </div>
+            </div>
 
             <div class="result-actions">
-                <button id="restartBtn" class="btn-primary">Play Again</button>
-                <button id="backBtn" class="btn-secondary">Main Menu</button>
-                <button id="goStatsBtn" class="btn-ghost">Details</button>
+                <button id="restartBtn" class="cta-btn">Play Again</button>
+                <button id="backMenuBtn" class="text-btn">Back to Menu</button>
             </div>
-
-            <div class="details-collapse">
-                <div id="stats" class="history-list"></div>
-            </div>
+            
+            <div id="history" style="display:none;"></div>
         </div>
     </section>
 
-    <section id="screenStats" class="screen modal-view">
-        <div class="modal-card wide-card">
-            <div class="modal-header">
-                <h2>Global Statistics</h2>
-                <button id="backFromStatsBtn" class="close-btn">×</button>
-            </div>
-            
-            <div id="statsSummary" class="summary-grid"></div>
-            
-            <div class="stats-columns">
-                <div class="col">
-                    <h3>By Topic</h3>
-                    <div id="statsByTopic" class="history-list"></div>
-                </div>
-                <div class="col">
-                    <h3>History</h3>
-                    <div id="statsLast" class="history-list"></div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div style="display: none;">
+        <select id="topic"><option value="js">JS</option><option value="movies">Movies</option></select>
+        <select id="amount"><option value="10">10</option></select>
+        <select id="timeLimit"><option value="20">20</option></select>
+        <select id="mode"><option value="normal">Normal</option></select>
+        <select id="shuffle"><option value="yes">Yes</option></select>
+        <button id="startBtn">Start</button>
+        <button id="openStatsBtn"></button>
+        <button id="clearHistoryBtn"></button>
+        <div id="hint"></div>
+        <button id="prevBtn"></button>
+    </div>
 
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="3d-background.js"></script>
+  
   <script>
-      document.addEventListener('DOMContentLoaded', () => {
-          const menu = document.getElementById('screenMenu');
-          const setup = document.getElementById('screenSetup');
-          const stats = document.getElementById('screenStats');
-          
-          document.getElementById('toSetupBtn').addEventListener('click', () => {
-              menu.classList.remove('active');
-              setTimeout(() => setup.classList.add('active'), 100); // Небольшая задержка для анимации
-          });
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('scrollToTopicsBtn').addEventListener('click', () => {
+            document.getElementById('topicsSection').scrollIntoView({ behavior: 'smooth' });
+        });
 
-          document.getElementById('backToMenuBtn').addEventListener('click', () => {
-              setup.classList.remove('active');
-              setTimeout(() => menu.classList.add('active'), 100);
-          });
-          
-          const backBtn = document.getElementById('backBtn');
-          const oldBackHandler = backBtn.onclick; 
-          backBtn.addEventListener('click', (e) => {
-              document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-              menu.classList.add('active');
-          });
+        const cards = document.querySelectorAll('.topic-card:not(.disabled)');
+        const topicSelect = document.getElementById('topic');
+        const startBtn = document.getElementById('startBtn');
+        const quizSection = document.getElementById('quizSection');
+        const heroSection = document.getElementById('heroSection');
+        const topicsSection = document.getElementById('topicsSection');
 
-          const showStats = () => {
-              document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-              stats.classList.add('active');
-          };
-          
-          document.getElementById('navStatsBtn').addEventListener('click', showStats);
-          document.getElementById('menuStatsBtn').addEventListener('click', showStats);
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const selectedTopic = card.dataset.topic;
+                topicSelect.value = selectedTopic;
+                topicSelect.dispatchEvent(new Event('change'));
+                
+                startBtn.click();
 
-          document.getElementById('backFromStatsBtn').addEventListener('click', () => {
-             stats.classList.remove('active');
-             menu.classList.add('active');
-          });
-      });
+                quizSection.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Блокируем скролл во время теста
+            });
+        });
+
+        document.getElementById('quitBtn').addEventListener('click', () => {
+            quizSection.classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            location.reload(); 
+        });
+
+        document.getElementById('backMenuBtn').addEventListener('click', () => {
+             location.reload();
+        });
+        
+        const finishBtn = document.getElementById('finishBtn');
+        finishBtn.addEventListener('click', () => {
+             setTimeout(() => {
+                 quizSection.classList.remove('active');
+                 document.getElementById('resultSection').classList.add('active');
+                 
+                 // Подсчет результатов (простая логика для примера)
+                 // Твой main.js должен заполнять summary, мы берем данные оттуда или считаем сами
+                 const scoreText = document.getElementById('summary')?.innerText || "0"; 
+                 // Тут нужна интеграция с твоим main.js для точных цифр
+             }, 500);
+        });
+    });
   </script>
+  
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>
