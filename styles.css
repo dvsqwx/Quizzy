@@ -1,7 +1,6 @@
 :root {
     --bg-light: #F9FAFB;
     
-
     --card-bg: rgba(255, 255, 255, 0.85);
     --card-border: rgba(0, 0, 0, 0.08);
     
@@ -10,12 +9,12 @@
     
     --accent: #8B5CF6; 
     --accent-hover: #7C3AED;
-    --accent-light-bg: #F3F0FF; 
+    --accent-light-bg: #F3F0FF;
     
     --primary-btn: #8B5CF6;
     --primary-btn-text: #ffffff;
     
-    --success: #34D399; 
+    --success: #34D399;
     --success-bg: #D1FAE5;
     --danger: #F87171;
     --danger-bg: #FEE2E2;
@@ -423,7 +422,6 @@ body {
 .btn:disabled {
     pointer-events: none;
 }
-
 
 .quiz-footer {
     margin-top: 32px;
