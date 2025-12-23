@@ -1,205 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quizzy - Перевірте свої знання</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quizzy</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-    <div class="loading-screen">
-        <div class="loading-logo">
-            <div class="logo-3d">
-                <div class="logo-face">Q</div>
-            </div>
-        </div>
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Завантаження Quizzy...</div>
-    </div>
 
-    <div class="glow glow-1"></div>
-    <div class="glow glow-2"></div>
+  <div id="canvas-container"></div>
 
-    <div class="particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
+  <main class="app-container">
+    
+    <nav class="navbar">
+        <div class="brand">QUIZZY</div>
+        <button id="navStatsBtn" class="nav-link">Leaderboard</button>
+    </nav>
 
-    <section class="hero" id="hero">
-        <!-- 3D Logo -->
-        <div class="logo-3d-container">
-            <div class="logo-3d">
-                <div class="logo-face">Q</div>
-                <div class="logo-face">U</div>
-                <div class="logo-face">I</div>
-                <div class="logo-face">Z</div>
-                <div class="logo-face">Z</div>
-                <div class="logo-face">Y</div>
-            </div>
-        </div>
-
+    <section id="heroSection" class="hero-section">
         <div class="hero-content">
-            <h1 class="hero-title">Quizzy</h1>
-            <p class="hero-subtitle">
-                Перевірте свої знання у різних сферах. 
-                Оберіть тему і почніть тестування прямо зараз!
-            </p>
-        </div>
-
-        <div class="scroll-indicator" onclick="document.getElementById('quizzes').scrollIntoView({behavior: 'smooth'})">
-            <span>Прокрутіть вниз</span>
-            <div class="scroll-icon"></div>
+            <h1 class="main-title">YOUR QUIZ <br> UNIVERSE</h1>
+            <p class="subtitle"></p>
+            <button id="scrollToTopicsBtn" class="cta-btn">
+                Get Started <span class="arrow">↓</span>
+            </button>
         </div>
     </section>
 
-    <section class="quiz-section" id="quizzes">
-        <div class="section-header">
-            <h2 class="section-title">Оберіть свій квіз</h2>
-            <p class="section-subtitle">
-                Широкий вибір тем для перевірки ваших знань
-            </p>
-        </div>
-
-        <div class="quiz-grid">
-            <!-- Quiz Card 1: Programming -->
-            <div class="quiz-card" onclick="startQuiz('programming')">
-                <div class="quiz-card-icon">💻</div>
-                <h3 class="quiz-card-title">Програмування</h3>
-                <p class="quiz-card-description">
-                    Перевірте свої знання основ програмування, алгоритмів та структур даних
-                </p>
-                <div class="quiz-card-meta">
-                    <span class="quiz-card-questions">📝 20 питань</span>
-                    <span class="quiz-card-difficulty medium">Середній</span>
+    <section id="topicsSection" class="topics-section">
+        <h2 class="section-title">Choose Your Path</h2>
+        
+        <div class="cards-grid">
+            <div class="topic-card card-yellow" data-topic="js">
+                <div class="card-icon">⚡</div>
+                <div class="card-info">
+                    <h3>JavaScript Core</h3>
+                    <p>Functions, Objects, ES6+</p>
                 </div>
-                <button class="quiz-card-button">Почати тест</button>
+                <div class="card-arrow">↗</div>
             </div>
 
-            <!-- Quiz Card 2: Mathematics -->
-            <div class="quiz-card" onclick="startQuiz('math')">
-                <div class="quiz-card-icon">🔢</div>
-                <h3 class="quiz-card-title">Математика</h3>
-                <p class="quiz-card-description">
-                    Від базової арифметики до складних рівнянь та геометрії
-                </p>
-                <div class="quiz-card-meta">
-                    <span class="quiz-card-questions">📝 15 питань</span>
-                    <span class="quiz-card-difficulty easy">Легкий</span>
+            <div class="topic-card card-peach" data-topic="movies">
+                <div class="card-icon">🎬</div>
+                <div class="card-info">
+                    <h3>Cinematography</h3>
+                    <p>Directors, Oscars, Cult Classics</p>
                 </div>
-                <button class="quiz-card-button">Почати тест</button>
+                <div class="card-arrow">↗</div>
             </div>
 
-            <!-- Quiz Card 3: Science -->
-            <div class="quiz-card" onclick="startQuiz('science')">
-                <div class="quiz-card-icon">🔬</div>
-                <h3 class="quiz-card-title">Наука</h3>
-                <p class="quiz-card-description">
-                    Фізика, хімія, біологія - перевірте свої наукові знання
-                </p>
-                <div class="quiz-card-meta">
-                    <span class="quiz-card-questions">📝 25 питань</span>
-                    <span class="quiz-card-difficulty hard">Складний</span>
+            <div class="topic-card card-teal disabled">
+                <div class="card-icon">🧪</div>
+                <div class="card-info">
+                    <h3>Science</h3>
+                    <p>Coming Soon</p>
                 </div>
-                <button class="quiz-card-button">Почати тест</button>
             </div>
 
-            <div class="quiz-card" onclick="startQuiz('history')">
-                <div class="quiz-card-icon">📚</div>
-                <h3 class="quiz-card-title">Історія</h3>
-                <p class="quiz-card-description">
-                    Подорож крізь епохи: від давнини до сучасності
-                </p>
-                <div class="quiz-card-meta">
-                    <span class="quiz-card-questions">📝 18 питань</span>
-                    <span class="quiz-card-difficulty medium">Середній</span>
+            <div class="topic-card card-purple disabled">
+                <div class="card-info">
+                    <h3>History</h3>
+                    <p>Coming Soon</p>
                 </div>
-                <button class="quiz-card-button">Почати тест</button>
-            </div>
-
-            <div class="quiz-card" onclick="startQuiz('geography')">
-                <div class="quiz-card-icon">🌍</div>
-                <h3 class="quiz-card-title">Географія</h3>
-                <p class="quiz-card-description">
-                    Континенти, країни, столиці - наскільки добре ви знаєте світ?
-                </p>
-                <div class="quiz-card-meta">
-                    <span class="quiz-card-questions">📝 20 питань</span>
-                    <span class="quiz-card-difficulty easy">Легкий</span>
-                </div>
-                <button class="quiz-card-button">Почати тест</button>
-            </div>
-
-            <div class="quiz-card" onclick="startQuiz('technology')">
-                <div class="quiz-card-icon">⚡</div>
-                <h3 class="quiz-card-title">Технології</h3>
-                <p class="quiz-card-description">
-                    Сучасні технології, гаджети, інновації та digital-тренди
-                </p>
-                <div class="quiz-card-meta">
-                    <span class="quiz-card-questions">📝 22 питань</span>
-                    <span class="quiz-card-difficulty hard">Складний</span>
-                </div>
-                <button class="quiz-card-button">Почати тест</button>
             </div>
         </div>
     </section>
 
-    <script>
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.querySelector('.loading-screen').style.display = 'none';
-            }, 2800);
-        });
+    <section id="quizSection" class="quiz-overlay">
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <div class="quiz-meta">
+                    <span id="categoryBadge" class="badge">TOPIC</span>
+                    <span id="progressText">1 / 10</span>
+                </div>
+                <button id="quitBtn" class="close-btn">✕</button>
+            </div>
 
-        function startQuiz(quizType) {
-            console.log('Starting quiz:', quizType);
-            alert(`Запускаємо квіз: ${quizType}`);
-        }
+            <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
 
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
+            <div class="question-block">
+                <h2 id="question" class="question-text">Loading Question...</h2>
+                <div id="timer" class="timer-badge">20s</div>
+            </div>
 
-        document.addEventListener('mousemove', (e) => {
-            const hero = document.querySelector('.hero');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
+            <div id="answers" class="answers-list">
+                </div>
+
+            <div class="quiz-footer">
+                <button id="skipBtn" class="text-btn">Skip</button>
+                <button id="nextBtn" class="cta-btn small">Next Question</button>
+                <button id="finishBtn" class="cta-btn small hidden">Finish Quiz</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="resultSection" class="quiz-overlay">
+        <div class="result-card">
+            <h2 class="result-title">Quiz Complete!</h2>
             
-            hero.style.transform = `translate(${x * 20 - 10}px, ${y * 20 - 10}px)`;
+            <div class="score-circle">
+                <span id="finalScore">0</span>
+                <span class="total">/ 10</span>
+            </div>
+
+            <div class="stats-summary">
+                <div class="stat-box correct">
+                    <span class="icon">✓</span>
+                    <span id="correctCount">0</span> Correct
+                </div>
+                <div class="stat-box wrong">
+                    <span class="icon">✕</span>
+                    <span id="wrongCount">0</span> Wrong
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button id="restartBtn" class="cta-btn">Play Again</button>
+                <button id="backMenuBtn" class="text-btn">Back to Menu</button>
+            </div>
+            
+            <div id="history" style="display:none;"></div>
+        </div>
+    </section>
+
+    <div style="display: none;">
+        <select id="topic"><option value="js">JS</option><option value="movies">Movies</option></select>
+        <select id="amount"><option value="10">10</option></select>
+        <select id="timeLimit"><option value="20">20</option></select>
+        <select id="mode"><option value="normal">Normal</option></select>
+        <select id="shuffle"><option value="yes">Yes</option></select>
+        <button id="startBtn">Start</button>
+        <button id="openStatsBtn"></button>
+        <button id="clearHistoryBtn"></button>
+        <div id="hint"></div>
+        <button id="prevBtn"></button>
+    </div>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="3d-background.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('scrollToTopicsBtn').addEventListener('click', () => {
+            document.getElementById('topicsSection').scrollIntoView({ behavior: 'smooth' });
         });
 
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
+        const cards = document.querySelectorAll('.topic-card:not(.disabled)');
+        const topicSelect = document.getElementById('topic');
+        const startBtn = document.getElementById('startBtn');
+        const quizSection = document.getElementById('quizSection');
+        const heroSection = document.getElementById('heroSection');
+        const topicsSection = document.getElementById('topicsSection');
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const selectedTopic = card.dataset.topic;
+                topicSelect.value = selectedTopic;
+                topicSelect.dispatchEvent(new Event('change'));
+                
+                startBtn.click();
+
+                quizSection.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Блокируем скролл во время теста
             });
-        }, observerOptions);
-
-        document.querySelectorAll('.quiz-card').forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(50px)';
-            card.style.transition = `all 0.6s ease ${index * 0.1}s`;
-            observer.observe(card);
         });
-    </script>
+
+        document.getElementById('quitBtn').addEventListener('click', () => {
+            quizSection.classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            location.reload(); 
+        });
+
+        document.getElementById('backMenuBtn').addEventListener('click', () => {
+             location.reload();
+        });
+        
+        const finishBtn = document.getElementById('finishBtn');
+        finishBtn.addEventListener('click', () => {
+             setTimeout(() => {
+                 quizSection.classList.remove('active');
+                 document.getElementById('resultSection').classList.add('active');
+                 
+                 // Подсчет результатов (простая логика для примера)
+                 // Твой main.js должен заполнять summary, мы берем данные оттуда или считаем сами
+                 const scoreText = document.getElementById('summary')?.innerText || "0"; 
+                 // Тут нужна интеграция с твоим main.js для точных цифр
+             }, 500);
+        });
+    });
+  </script>
+  
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
+
+
+
