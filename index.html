@@ -185,11 +185,8 @@
              setTimeout(() => {
                  quizSection.classList.remove('active');
                  document.getElementById('resultSection').classList.add('active');
-                 
-                 // Подсчет результатов (простая логика для примера)
-                 // Твой main.js должен заполнять summary, мы берем данные оттуда или считаем сами
+
                  const scoreText = document.getElementById('summary')?.innerText || "0"; 
-                 // Тут нужна интеграция с твоим main.js для точных цифр
              }, 500);
         });
     });
