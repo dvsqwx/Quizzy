@@ -7,6 +7,32 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
+
+  <style>
+    #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    
+    .hero-content {
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+  </style>
+
+  <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+  </script>
 </head>
 <body>
 
@@ -139,9 +165,6 @@
     </div>
 
   </main>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="3d-background.js"></script>
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -153,8 +176,6 @@
         const topicSelect = document.getElementById('topic');
         const startBtn = document.getElementById('startBtn');
         const quizSection = document.getElementById('quizSection');
-        const heroSection = document.getElementById('heroSection');
-        const topicsSection = document.getElementById('topicsSection');
 
         cards.forEach(card => {
             card.addEventListener('click', () => {
@@ -165,7 +186,7 @@
                 startBtn.click();
 
                 quizSection.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Блокируем скролл во время теста
+                document.body.style.overflow = 'hidden'; 
             });
         });
 
@@ -185,16 +206,102 @@
              setTimeout(() => {
                  quizSection.classList.remove('active');
                  document.getElementById('resultSection').classList.add('active');
-
-                 const scoreText = document.getElementById('summary')?.innerText || "0"; 
+                 // const scoreText = document.getElementById('summary')?.innerText || "0"; 
              }, 500);
         });
     });
   </script>
   
   <script type="module" src="./src/main.js"></script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const container = document.getElementById('canvas-container');
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 4.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enableZoom = false;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 2.0;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 50);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    const crystalGroup = new THREE.Group();
+
+    const material = new THREE.MeshStandardMaterial({ 
+        color: 0x00ffff,     
+        roughness: 0.1,      
+        metalness: 0.9,      
+        flatShading: true,
+        transparent: true,
+        opacity: 0.9
+    });
+
+    const boxSize = 1;
+    const boxHeight = 0.3; 
+    const boxGeo = new THREE.BoxGeometry(boxSize, boxHeight, boxSize);
+    const box = new THREE.Mesh(boxGeo, material);
+    crystalGroup.add(box);
+
+    const pyramidHeight = 1.2;
+    const radius = (boxSize / 2) * Math.sqrt(2); 
+    const coneGeo = new THREE.ConeGeometry(radius, pyramidHeight, 4); 
+    const topPyramid = new THREE.Mesh(coneGeo, material);
+    
+    topPyramid.position.y = (boxHeight / 2) + (pyramidHeight / 2);
+    topPyramid.rotation.y = Math.PI / 4;
+    crystalGroup.add(topPyramid);
+
+    const bottomPyramid = topPyramid.clone();
+    bottomPyramid.rotation.z = Math.PI; 
+    bottomPyramid.rotation.y = Math.PI / 4; 
+    bottomPyramid.position.y = -((boxHeight / 2) + (pyramidHeight / 2));
+    crystalGroup.add(bottomPyramid);
+
+    const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+    crystalGroup.children.forEach(mesh => {
+        const wiregeo = new THREE.EdgesGeometry(mesh.geometry);
+        const wire = new THREE.LineSegments(wiregeo, wireframeMaterial);
+        mesh.add(wire);
+    });
+
+    scene.add(crystalGroup);
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        crystalGroup.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+        
+        crystalGroup.rotation.y += 0.002;
+
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
-
-
-
